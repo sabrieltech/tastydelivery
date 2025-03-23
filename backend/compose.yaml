@@ -1,0 +1,124 @@
+networks:
+  fooddelivery-net:
+    driver: bridge
+    name: fooddelivery-net
+
+services:
+  ###################################
+  # Customer: The Customer microservice
+  ###################################
+  customer:
+    build:
+      context: ./customer/
+      dockerfile: customer.Dockerfile
+    image: fooddelivery/customer:latest
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5006:5006"
+    networks:
+      - fooddelivery-net
+
+  ###################################
+  # Restaurant: The Restaurant microservice
+  ###################################
+  restaurant:
+    build:
+      context: ./restaurant/
+      dockerfile: restaurant.Dockerfile
+    image: fooddelivery/restaurant:latest
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5007:5007"
+    networks:
+      - fooddelivery-net
+
+  ###################################
+  # Restaurant Inventory: The Restaurant Inventory microservice
+  ###################################
+  restaurant_inventory:
+    build:
+      context: ./restaurant_inventory/
+      dockerfile: restaurant_inventory.Dockerfile
+    image: fooddelivery/restaurant_inventory:latest
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5008:5008"
+    networks:
+      - fooddelivery-net
+
+  ###################################
+  # Transaction: The Transaction microservice
+  ###################################
+  transaction:
+    build:
+      context: ./transaction/
+      dockerfile: transaction.Dockerfile
+    image: fooddelivery/transaction:latest
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5009:5009"
+    networks:
+      - fooddelivery-net
+
+  ###################################
+  # Transaction Item: The Transaction Item microservice
+  ###################################
+  transaction_item:
+    build:
+      context: ./transaction_item/
+      dockerfile: transaction_item.Dockerfile
+    image: fooddelivery/transaction_item:latest
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5010:5010"
+    networks:
+      - fooddelivery-net
+
+  ###################################
+  # Notification: The Notification microservice
+  ###################################
+  notification:
+    build:
+      context: ./notification/
+      dockerfile: notification.Dockerfile
+    image: fooddelivery/notification:latest
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5011:5011"
+    networks:
+      - fooddelivery-net
+
+  ###################################
+  # Voucher: The Voucher microservice
+  ###################################
+  voucher:
+    build:
+      context: ./voucher/
+      dockerfile: voucher.Dockerfile
+    image: fooddelivery/voucher:latest
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5012:5012"
+    networks:
+      - fooddelivery-net

@@ -1,0 +1,197 @@
+{
+	"info": {
+		"_postman_id": "e1f2g3h4-i5j6-k7l8-m9n0-o1p2q3r4s5t6",
+		"name": "Food Delivery - Transaction Item Service",
+		"description": "API collection for testing the Transaction Item microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Transaction Items",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5010/transaction_item",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5010",
+					"path": [
+						"transaction_item"
+					]
+				},
+				"description": "Retrieves all transaction items from the database"
+			}
+		},
+		{
+			"name": "Get Transaction Item by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5010/transaction_item/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5010",
+					"path": [
+						"transaction_item",
+						"1"
+					]
+				},
+				"description": "Retrieves a specific transaction item by ID"
+			}
+		},
+		{
+			"name": "Get Transaction Items by Transaction ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5010/transaction_item/transaction/TRANS001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5010",
+					"path": [
+						"transaction_item",
+						"transaction",
+						"TRANS001"
+					]
+				},
+				"description": "Retrieves all items for a specific transaction"
+			}
+		},
+		{
+			"name": "Get Transaction Items by Restaurant ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5010/transaction_item/restaurant/REST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5010",
+					"path": [
+						"transaction_item",
+						"restaurant",
+						"REST001"
+					]
+				},
+				"description": "Retrieves all transaction items from a specific restaurant"
+			}
+		},
+		{
+			"name": "Create New Transaction Item",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"transaction_id\": \"TRANS001\",\n    \"restaurant_id\": \"REST001\",\n    \"item_id\": 1,\n    \"quantity\": 2,\n    \"price_per_item\": 8.99,\n    \"total_price\": 17.98\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5010/transaction_item",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5010",
+					"path": [
+						"transaction_item"
+					]
+				},
+				"description": "Creates a new transaction item"
+			}
+		},
+		{
+			"name": "Create Batch Transaction Items",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"items\": [\n        {\n            \"transaction_id\": \"TRANS016\",\n            \"restaurant_id\": \"REST001\",\n            \"item_id\": 1,\n            \"quantity\": 1,\n            \"price_per_item\": 8.99,\n            \"total_price\": 8.99\n        },\n        {\n            \"transaction_id\": \"TRANS016\",\n            \"restaurant_id\": \"REST001\",\n            \"item_id\": 2,\n            \"quantity\": 2,\n            \"price_per_item\": 3.49,\n            \"total_price\": 6.98\n        },\n        {\n            \"transaction_id\": \"TRANS016\",\n            \"restaurant_id\": \"REST001\",\n            \"item_id\": 3,\n            \"quantity\": 3,\n            \"price_per_item\": 1.99,\n            \"total_price\": 5.97\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5010/transaction_item/batch",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5010",
+					"path": [
+						"transaction_item",
+						"batch"
+					]
+				},
+				"description": "Creates multiple transaction items in a single request"
+			}
+		},
+		{
+			"name": "Update Transaction Item",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"quantity\": 3,\n    \"total_price\": 26.97\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5010/transaction_item/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5010",
+					"path": [
+						"transaction_item",
+						"1"
+					]
+				},
+				"description": "Updates an existing transaction item"
+			}
+		},
+		{
+			"name": "Delete Transaction Item",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5010/transaction_item/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5010",
+					"path": [
+						"transaction_item",
+						"1"
+					]
+				},
+				"description": "Deletes a transaction item from the database"
+			}
+		}
+	]
+}
