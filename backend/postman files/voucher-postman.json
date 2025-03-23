@@ -1,0 +1,251 @@
+{
+	"info": {
+		"_postman_id": "g1h2i3j4-k5l6-m7n8-o9p0-q1r2s3t4u5v6",
+		"name": "Food Delivery - Voucher Service",
+		"description": "API collection for testing the Voucher microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Vouchers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5012/voucher",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5012",
+					"path": [
+						"voucher"
+					]
+				},
+				"description": "Retrieves all vouchers from the database"
+			}
+		},
+		{
+			"name": "Get Voucher by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5012/voucher/VOUCH001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5012",
+					"path": [
+						"voucher",
+						"VOUCH001"
+					]
+				},
+				"description": "Retrieves a specific voucher by ID"
+			}
+		},
+		{
+			"name": "Get Voucher by Code",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5012/voucher/code/DISCOUNT10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5012",
+					"path": [
+						"voucher",
+						"code",
+						"DISCOUNT10"
+					]
+				},
+				"description": "Retrieves a specific voucher by its code"
+			}
+		},
+		{
+			"name": "Get Vouchers by Customer ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5012/voucher/customer/CUST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5012",
+					"path": [
+						"voucher",
+						"customer",
+						"CUST001"
+					]
+				},
+				"description": "Retrieves all vouchers for a specific customer"
+			}
+		},
+		{
+			"name": "Get Active Vouchers by Customer ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5012/voucher/active/customer/CUST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5012",
+					"path": [
+						"voucher",
+						"active",
+						"customer",
+						"CUST001"
+					]
+				},
+				"description": "Retrieves all active vouchers for a specific customer"
+			}
+		},
+		{
+			"name": "Validate Voucher",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"DISCOUNT10\",\n    \"customer_id\": \"CUST001\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5012/voucher/validate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5012",
+					"path": [
+						"voucher",
+						"validate"
+					]
+				},
+				"description": "Validates a voucher code for a specific customer"
+			}
+		},
+		{
+			"name": "Create New Voucher",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"NEWUSER20\",\n    \"discount_percentage\": 20.00,\n    \"max_discount_amount\": 10.00,\n    \"expiry_date\": \"2025-12-31\",\n    \"status\": \"Active\",\n    \"customer_id\": \"CUST001\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5012/voucher/VOUCH007",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5012",
+					"path": [
+						"voucher",
+						"VOUCH007"
+					]
+				},
+				"description": "Creates a new voucher"
+			}
+		},
+		{
+			"name": "Update Voucher Status",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"status\": \"Used\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5012/voucher/VOUCH001/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5012",
+					"path": [
+						"voucher",
+						"VOUCH001",
+						"status"
+					]
+				},
+				"description": "Updates a voucher's status"
+			}
+		},
+		{
+			"name": "Assign Voucher to Customer",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customer_id\": \"CUST002\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5012/voucher/VOUCH007/assign",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5012",
+					"path": [
+						"voucher",
+						"VOUCH007",
+						"assign"
+					]
+				},
+				"description": "Assigns a voucher to a customer"
+			}
+		},
+		{
+			"name": "Delete Voucher",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5012/voucher/VOUCH007",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5012",
+					"path": [
+						"voucher",
+						"VOUCH007"
+					]
+				},
+				"description": "Deletes a voucher from the database"
+			}
+		}
+	]
+}

@@ -1,0 +1,184 @@
+{
+	"info": {
+		"_postman_id": "f1g2h3i4-j5k6-l7m8-n9o0-p1q2r3s4t5u6",
+		"name": "Food Delivery - Notification Service",
+		"description": "API collection for testing the Notification microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Notifications",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5011/notification",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5011",
+					"path": [
+						"notification"
+					]
+				},
+				"description": "Retrieves all notifications from the database"
+			}
+		},
+		{
+			"name": "Get Notification by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5011/notification/NOTIF001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5011",
+					"path": [
+						"notification",
+						"NOTIF001"
+					]
+				},
+				"description": "Retrieves a specific notification by ID"
+			}
+		},
+		{
+			"name": "Get Notifications by Customer ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5011/notification/customer/CUST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5011",
+					"path": [
+						"notification",
+						"customer",
+						"CUST001"
+					]
+				},
+				"description": "Retrieves all notifications for a specific customer"
+			}
+		},
+		{
+			"name": "Get Unread Notifications by Customer ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5011/notification/unread/customer/CUST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5011",
+					"path": [
+						"notification",
+						"unread",
+						"customer",
+						"CUST001"
+					]
+				},
+				"description": "Retrieves all unread notifications for a specific customer"
+			}
+		},
+		{
+			"name": "Create New Notification",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customer_id\": \"CUST001\",\n    \"message_type\": \"Payment_Success\",\n    \"transaction_id\": \"TRANS016\",\n    \"loyalty_points\": 15,\n    \"loyalty_status\": \"Silver\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5011/notification/NOTIF016",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5011",
+					"path": [
+						"notification",
+						"NOTIF016"
+					]
+				},
+				"description": "Creates a new notification"
+			}
+		},
+		{
+			"name": "Mark Notification as Read",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5011/notification/NOTIF001/read",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5011",
+					"path": [
+						"notification",
+						"NOTIF001",
+						"read"
+					]
+				},
+				"description": "Marks a notification as read"
+			}
+		},
+		{
+			"name": "Mark All Notifications as Read",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5011/notification/mark_all_read/customer/CUST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5011",
+					"path": [
+						"notification",
+						"mark_all_read",
+						"customer",
+						"CUST001"
+					]
+				},
+				"description": "Marks all notifications for a customer as read"
+			}
+		},
+		{
+			"name": "Delete Notification",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5011/notification/NOTIF016",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5011",
+					"path": [
+						"notification",
+						"NOTIF016"
+					]
+				},
+				"description": "Deletes a notification"
+			}
+		}
+	]
+}

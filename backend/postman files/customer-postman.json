@@ -1,0 +1,199 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+		"name": "Food Delivery - Customer Service",
+		"description": "API collection for testing the Customer microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Customers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5006/customer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5006",
+					"path": [
+						"customer"
+					]
+				},
+				"description": "Retrieves all customers from the database"
+			}
+		},
+		{
+			"name": "Get Customer by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5006/customer/CUST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5006",
+					"path": [
+						"customer",
+						"CUST001"
+					]
+				},
+				"description": "Retrieves a specific customer by their ID"
+			}
+		},
+		{
+			"name": "Get Customer by Username",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5006/customer/username/alice_j",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5006",
+					"path": [
+						"customer",
+						"username",
+						"alice_j"
+					]
+				},
+				"description": "Retrieves a specific customer by their username"
+			}
+		},
+		{
+			"name": "Get Customer by Email",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5006/customer/email/alice@example.com",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5006",
+					"path": [
+						"customer",
+						"email",
+						"alice@example.com"
+					]
+				},
+				"description": "Retrieves a specific customer by their email"
+			}
+		},
+		{
+			"name": "Create New Customer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"david_m\",\n    \"password_hash\": \"hashed_password_4\",\n    \"name\": \"David Miller\",\n    \"email\": \"david@example.com\",\n    \"phone_number\": \"+1234509876\",\n    \"latitude\": 37.774929,\n    \"longitude\": -122.419418,\n    \"loyalty_points\": 0,\n    \"loyalty_status\": \"Bronze\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5006/customer/CUST004",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5006",
+					"path": [
+						"customer",
+						"CUST004"
+					]
+				},
+				"description": "Creates a new customer with the specified ID"
+			}
+		},
+		{
+			"name": "Update Customer",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Alice Johnson Updated\",\n    \"phone_number\": \"+1234567899\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5006/customer/CUST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5006",
+					"path": [
+						"customer",
+						"CUST001"
+					]
+				},
+				"description": "Updates an existing customer's information"
+			}
+		},
+		{
+			"name": "Update Customer Loyalty",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"loyalty_points\": 250\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5006/customer/CUST001/loyalty",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5006",
+					"path": [
+						"customer",
+						"CUST001",
+						"loyalty"
+					]
+				},
+				"description": "Updates a customer's loyalty points and automatically adjusts their loyalty status"
+			}
+		},
+		{
+			"name": "Delete Customer",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5006/customer/CUST004",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5006",
+					"path": [
+						"customer",
+						"CUST004"
+					]
+				},
+				"description": "Deletes a customer from the database"
+			}
+		}
+	]
+}

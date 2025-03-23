@@ -1,0 +1,199 @@
+{
+	"info": {
+		"_postman_id": "b1c2d3e4-f5g6-h7i8-j9k0-l1m2n3o4p5q6",
+		"name": "Food Delivery - Restaurant Service",
+		"description": "API collection for testing the Restaurant microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Restaurants",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5007/restaurant",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5007",
+					"path": [
+						"restaurant"
+					]
+				},
+				"description": "Retrieves all restaurants from the database"
+			}
+		},
+		{
+			"name": "Get Restaurant by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5007/restaurant/REST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5007",
+					"path": [
+						"restaurant",
+						"REST001"
+					]
+				},
+				"description": "Retrieves a specific restaurant by ID"
+			}
+		},
+		{
+			"name": "Get Restaurant by Username",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5007/restaurant/username/gourmet_delight",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5007",
+					"path": [
+						"restaurant",
+						"username",
+						"gourmet_delight"
+					]
+				},
+				"description": "Retrieves a specific restaurant by username"
+			}
+		},
+		{
+			"name": "Get Restaurants by Cuisine Type",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5007/restaurant/cuisine/Italian",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5007",
+					"path": [
+						"restaurant",
+						"cuisine",
+						"Italian"
+					]
+				},
+				"description": "Retrieves all restaurants with a specific cuisine type"
+			}
+		},
+		{
+			"name": "Create New Restaurant",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"pasta_palace\",\n    \"password_hash\": \"hashed_password_6\",\n    \"name\": \"Pasta Palace\",\n    \"latitude\": 39.952583,\n    \"longitude\": -75.165222,\n    \"contact_number\": \"+6677889900\",\n    \"cuisine_type\": \"Italian\",\n    \"rating\": 4.3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5007/restaurant/REST006",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5007",
+					"path": [
+						"restaurant",
+						"REST006"
+					]
+				},
+				"description": "Creates a new restaurant with the specified ID"
+			}
+		},
+		{
+			"name": "Update Restaurant",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Gourmet Delight Updated\",\n    \"contact_number\": \"+1122334466\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5007/restaurant/REST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5007",
+					"path": [
+						"restaurant",
+						"REST001"
+					]
+				},
+				"description": "Updates an existing restaurant's information"
+			}
+		},
+		{
+			"name": "Update Restaurant Rating",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"rating\": 4.9\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5007/restaurant/REST001/rating",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5007",
+					"path": [
+						"restaurant",
+						"REST001",
+						"rating"
+					]
+				},
+				"description": "Updates a restaurant's rating"
+			}
+		},
+		{
+			"name": "Delete Restaurant",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5007/restaurant/REST006",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5007",
+					"path": [
+						"restaurant",
+						"REST006"
+					]
+				},
+				"description": "Deletes a restaurant from the database"
+			}
+		}
+	]
+}

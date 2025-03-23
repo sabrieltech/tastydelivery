@@ -1,0 +1,208 @@
+{
+	"info": {
+		"_postman_id": "d1e2f3g4-h5i6-j7k8-l9m0-n1o2p3q4r5s6",
+		"name": "Food Delivery - Transaction Service",
+		"description": "API collection for testing the Transaction microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Transactions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5009/transaction",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5009",
+					"path": [
+						"transaction"
+					]
+				},
+				"description": "Retrieves all transactions from the database"
+			}
+		},
+		{
+			"name": "Get Transaction by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5009/transaction/TRANS001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5009",
+					"path": [
+						"transaction",
+						"TRANS001"
+					]
+				},
+				"description": "Retrieves a specific transaction by ID"
+			}
+		},
+		{
+			"name": "Get Transactions by Customer ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5009/transaction/customer/CUST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5009",
+					"path": [
+						"transaction",
+						"customer",
+						"CUST001"
+					]
+				},
+				"description": "Retrieves all transactions for a specific customer"
+			}
+		},
+		{
+			"name": "Get Transactions by Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5009/transaction/status/Pending",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5009",
+					"path": [
+						"transaction",
+						"status",
+						"Pending"
+					]
+				},
+				"description": "Retrieves all transactions with a specific status"
+			}
+		},
+		{
+			"name": "Create New Transaction",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"transaction_id\": \"TRANS016\",\n    \"customer_id\": \"CUST001\",\n    \"food_cost\": 22.50,\n    \"delivery_cost\": 3.99,\n    \"loyalty_discount_percentage\": 5.00,\n    \"total_price_after_discount\": 25.07,\n    \"loyalty_points_added\": 10,\n    \"current_loyalty_points\": 184,\n    \"current_loyalty_status\": \"Silver\",\n    \"status\": \"Pending\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5009/transaction",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5009",
+					"path": [
+						"transaction"
+					]
+				},
+				"description": "Creates a new transaction"
+			}
+		},
+		{
+			"name": "Update Transaction",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"food_cost\": 24.50,\n    \"total_price_after_discount\": 26.97\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5009/transaction/TRANS001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5009",
+					"path": [
+						"transaction",
+						"TRANS001"
+					]
+				},
+				"description": "Updates an existing transaction"
+			}
+		},
+		{
+			"name": "Update Transaction Status",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"status\": \"Paid\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5009/transaction/TRANS003/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5009",
+					"path": [
+						"transaction",
+						"TRANS003",
+						"status"
+					]
+				},
+				"description": "Updates the status of a transaction"
+			}
+		},
+		{
+			"name": "Assign Rider to Transaction",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"rider_id\": \"RIDER002\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5009/transaction/TRANS003/assign_rider",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5009",
+					"path": [
+						"transaction",
+						"TRANS003",
+						"assign_rider"
+					]
+				},
+				"description": "Assigns a rider to a transaction"
+			}
+		}
+	]
+}
