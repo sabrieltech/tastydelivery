@@ -69,20 +69,50 @@ CREATE TABLE IF NOT EXISTS `restaurant` (
   `contact_number` VARCHAR(20) NOT NULL,
   `cuisine_type` VARCHAR(100) NOT NULL,
   `rating` DECIMAL(2,1) NOT NULL DEFAULT 0.0,
+  `image_url` VARCHAR(255) NOT NULL,  -- Added image URL column
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`restaurant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 --
 -- Dumping data for table `restaurant`
 --
 
-INSERT INTO `restaurant` (`restaurant_id`, `username`, `password_hash`, `name`, `latitude`, `longitude`, `contact_number`, `cuisine_type`, `rating`, `created_at`) VALUES
-('REST001', 'gourmet_delight', 'hashed_password_1', 'Gourmet Delight', 40.712776, -74.005974, '+1122334455', 'Italian', 4.5, NOW()),
-('REST002', 'spicy_fusion', 'hashed_password_2', 'Spicy Fusion', 34.052235, -118.243683, '+2233445566', 'Indian', 4.2, NOW()),
-('REST003', 'green_eats', 'hashed_password_3', 'Green Eats', 37.774929, -122.419418, '+3344556677', 'Vegan', 4.8, NOW()),
-('REST004', 'bbq_haven', 'hashed_password_4', 'BBQ Haven', 41.878113, -87.629799, '+4455667788', 'BBQ', 4.6, NOW()),
-('REST005', 'sushi_world', 'hashed_password_5', 'Sushi World', 35.689487, 139.691711, '+5566778899', 'Japanese', 4.7, NOW());
+INSERT INTO `restaurant` (
+  `restaurant_id`, `username`, `password_hash`, `name`, `latitude`, `longitude`, 
+  `contact_number`, `cuisine_type`, `rating`, `created_at`, `image_url`
+) VALUES
+('REST001', 'gourmet_delight', 'hashed_password_1', 'Gourmet Delight', 40.712776, -74.005974, '+1122334455', 'Italian', 5.0, NOW(), 
+'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//italian.jpg'),
+
+('REST002', 'spicy_fusion', 'hashed_password_2', 'Spicy Fusion', 34.052235, -118.243683, '+2233445566', 'Indian', 4.9, NOW(), 
+'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//indian.jpg'),
+
+('REST003', 'green_eats', 'hashed_password_3', 'Green Eats', 37.774929, -122.419418, '+3344556677', 'Vegan', 4.8, NOW(), 
+'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//vegan.jpg'),
+
+('REST004', 'bbq_haven', 'hashed_password_4', 'BBQ Haven', 41.878113, -87.629799, '+4455667788', 'BBQ', 4.6, NOW(), 
+'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//bbq.jpg'),
+
+('REST005', 'sushi_world', 'hashed_password_5', 'Sushi World', 35.689487, 139.691711, '+5566778899', 'Japanese', 4.7, NOW(), 
+'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//japanese.jpg'),
+
+('REST006', 'french_bistro', 'hashed_password_6', 'French Bistro', 48.856613, 2.352222, '+6677889900', 'French', 4.6, NOW(), 
+'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//french.jpg'),
+
+('REST007', 'thai_express', 'hashed_password_7', 'Thai Express', 13.756331, 100.501762, '+7788990011', 'Thai', 4.4, NOW(), 
+'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//thai.jpg'),
+
+('REST008', 'mexican_fiesta', 'hashed_password_8', 'Mexican Fiesta', 19.432608, -99.133209, '+8899001122', 'Mexican', 4.3, NOW(), 
+'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//mexican.jpg'),
+
+('REST009', 'korean_bbq', 'hashed_password_9', 'Korean BBQ', 37.566536, 126.977966, '+9900112233', 'Korean', 4.6, NOW(), 
+'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//korean.jpg'),
+
+('REST010', 'mediterranean_delight', 'hashed_password_10', 'Mediterranean Delight', 36.721274, -4.421398, '+0011223344', 'Mediterranean', 4.5, NOW(), 
+'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//mediterranean.jpg');
+
 
 --
 -- Table structure for table `restaurant_inventory`
@@ -95,30 +125,110 @@ CREATE TABLE IF NOT EXISTS `restaurant_inventory` (
   `item_name` VARCHAR(255) NOT NULL,
   `price` DECIMAL(10,2) NOT NULL,
   `stock_quantity` INT(11) NOT NULL,
+  `image_url` VARCHAR(255) NOT NULL,
   `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`item_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
 --
 -- Dumping data for table `restaurant_inventory`
 --
+INSERT INTO `restaurant_inventory` 
+(`restaurant_id`, `item_name`, `price`, `stock_quantity`, `image_url`, `last_updated`) 
+VALUES
+('REST001', 'Spaghetti Carbonara', 10.99, 50, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//carbonara.jpg', NOW()),
+('REST001', 'Lasagna', 13.49, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//lasagna.jpg', NOW()),
+('REST001', 'Bruschetta', 5.49, 70, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//bruschetta.jpg', NOW()),
+('REST001', 'Tiramisu', 6.99, 60, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//tiramisu.jpg', NOW()),
+('REST001', 'Caprese Salad', 8.49, 50, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//caprese.jpg', NOW()),
+('REST001', 'Fettuccine Alfredo', 11.99, 45, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//alfredo.jpg', NOW()),
+('REST001', 'Cannoli', 4.99, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//cannoli.jpg', NOW());
+
+INSERT INTO `restaurant_inventory` 
+(`restaurant_id`, `item_name`, `price`, `stock_quantity`, `image_url`, `last_updated`) 
+VALUES
+('REST002', 'Butter Chicken', 11.99, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//butter%20chicken.jpg', NOW()),
+('REST002', 'Chicken Tikka Masala', 10.49, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//chicken%20tikka%20masala.jpg', NOW()),
+('REST002', 'Biryani', 12.99, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//biryani.jpg', NOW()),
+('REST002', 'Samosas', 4.99, 80, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//samosas.jpg', NOW()),
+('REST002', 'Paneer Tikka', 8.99, 60, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//paneer%20tikka.jpg', NOW()),
+('REST002', 'Mango Lassi', 3.49, 90, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//mango%20lassi.jpg', NOW()),
+('REST002', 'Naan', 2.49, 100, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//naan.jpg', NOW());
+
 
 INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
-('REST001', 'Cheeseburger', 8.99, 50, NOW()),
-('REST001', 'French Fries', 3.49, 100, NOW()),
-('REST001', 'Coke', 1.99, 200, NOW()),
-('REST002', 'Margherita Pizza', 12.99, 30, NOW()),
-('REST002', 'Garlic Bread', 4.99, 80, NOW()),
-('REST002', 'Lemonade', 2.99, 150, NOW()),
-('REST003', 'Sushi Roll', 14.99, 40, NOW()),
-('REST003', 'Miso Soup', 2.99, 90, NOW()),
-('REST003', 'Green Tea', 1.49, 120, NOW()),
-('REST004', 'BBQ Ribs', 18.99, 25, NOW()),
-('REST004', 'Cornbread', 3.99, 70, NOW()),
-('REST004', 'Iced Tea', 2.49, 130, NOW()),
-('REST005', 'Salmon Nigiri', 16.99, 35, NOW()),
-('REST005', 'Tempura', 9.99, 60, NOW()),
-('REST005', 'Matcha Latte', 4.49, 90, NOW());
+('REST003', 'Vegan Buddha Bowl', 9.99, 40, NOW()),
+('REST003', 'Tofu Stir Fry', 8.99, 0, NOW()),
+('REST003', 'Vegan Tacos', 10.49, 30, NOW()),
+('REST003', 'Lentil Soup', 7.99, 40, NOW()),
+('REST003', 'Vegan Burrito', 11.49, 30, NOW()),
+('REST003', 'Falafel Wrap', 9.29, 35, NOW()),
+('REST003', 'Avocado Toast', 7.49, 40, NOW());
+
+INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
+('REST004', 'Pulled Pork Sandwich', 9.99, 40, NOW()),
+('REST004', 'BBQ Chicken Wings', 10.49, 0, NOW()),
+('REST004', 'Mac & Cheese', 5.99, 60, NOW()),
+('REST004', 'Smoked Brisket', 14.99, 30, NOW()),
+('REST004', 'Grilled Corn', 3.49, 70, NOW()),
+('REST004', 'BBQ Pulled Jackfruit', 8.49, 35, NOW()),
+('REST004', 'Potato Salad', 4.99, 40, NOW());
+
+INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
+('REST005', 'Dragon Roll', 13.99, 40, NOW()),
+('REST005', 'Tuna Sashimi', 12.49, 0, NOW()),
+('REST005', 'Shrimp Tempura', 9.99, 50, NOW()),
+('REST005', 'Ramen', 10.99, 40, NOW()),
+('REST005', 'Katsu Curry', 11.49, 30, NOW()),
+('REST005', 'Takoyaki', 6.49, 60, NOW()),
+('REST005', 'Onigiri', 3.99, 70, NOW());
+
+INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
+('REST006', 'Croissant', 2.99, 100, NOW()),
+('REST006', 'Quiche Lorraine', 8.99, 50, NOW()),
+('REST006', 'Beef Bourguignon', 15.49, 0, NOW()),
+('REST006', 'French Onion Soup', 6.99, 40, NOW()),
+('REST006', 'Ratatouille', 10.49, 30, NOW()),
+('REST006', 'Crepe Suzette', 7.99, 40, NOW()),
+('REST006', 'Escargot', 12.99, 25, NOW());
+
+INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
+('REST007', 'Pad Thai', 9.99, 50, NOW()),
+('REST007', 'Green Curry', 10.49, 30, NOW()),
+('REST007', 'Tom Yum Soup', 8.49, 0, NOW()),
+('REST007', 'Mango Sticky Rice', 5.99, 70, NOW()),
+('REST007', 'Spring Rolls', 4.49, 60, NOW()),
+('REST007', 'Papaya Salad', 7.49, 50, NOW()),
+('REST007', 'Thai Milk Tea', 3.99, 80, NOW());
+
+INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
+('REST008', 'Tacos Al Pastor', 10.49, 50, NOW()),
+('REST008', 'Burrito Bowl', 11.49, 0, NOW()),
+('REST008', 'Enchiladas', 9.99, 40, NOW()),
+('REST008', 'Quesadilla', 8.49, 30, NOW()),
+('REST008', 'Nachos Supreme', 6.99, 0, NOW()),
+('REST008', 'Guacamole', 4.99, 60, NOW()),
+('REST008', 'Horchata', 3.99, 80, NOW());
+
+INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
+('REST009', 'Bibimbap', 9.99, 0, NOW()),
+('REST009', 'Kimchi Fried Rice', 8.49, 50, NOW()),
+('REST009', 'Tteokbokki', 6.99, 0, NOW()),
+('REST009', 'Bulgogi', 12.49, 30, NOW()),
+('REST009', 'Korean Fried Chicken', 11.49, 40, NOW()),
+('REST009', 'Japchae', 10.49, 30, NOW()),
+('REST009', 'Soju', 3.99, 70, NOW());
+
+INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
+('REST010', 'Falafel Platter', 9.49, 50, NOW()),
+('REST010', 'Hummus & Pita', 7.99, 0, NOW()),
+('REST010', 'Greek Salad', 8.49, 70, NOW()),
+('REST010', 'Shawarma Wrap', 9.99, 40, NOW()),
+('REST010', 'Baklava', 5.99, 30, NOW()),
+('REST010', 'Tabbouleh', 6.49, 50, NOW()),
+('REST010', 'Lemon Mint Drink', 3.99, 0, NOW());
+
 
 --
 -- Table structure for table `voucher`

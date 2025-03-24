@@ -62,6 +62,11 @@ const routes = [
     name: 'AppHome',
     component: AppHomePage,
     beforeEnter: requireAuth
+  },
+  {
+    path: '/restaurant/:id/menu',
+    name: 'RestaurantMenu',
+    component: () => import('../views/RestaurantMenu.vue')
   }
 ]
 

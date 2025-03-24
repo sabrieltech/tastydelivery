@@ -122,3 +122,35 @@ services:
       - "5012:5012"
     networks:
       - fooddelivery-net
+
+  
+  ###################################
+  # Personalized Homepage: The composite microservice
+  ###################################
+  displayPersonalizedHomepage:
+    build:
+      context: ./displayPersonalizedHomepage/
+      dockerfile: displayPersonalizedHomepage.Dockerfile
+    image: fooddelivery/personalized_homepage:latest
+    restart: always
+    environment:
+      customer_URL: "http://customer:5006/customer"
+      restaurant_URL: "http://restaurant:5007/restaurant"
+      restaurant_inventory_URL: "http://restaurant_inventory:5008/restaurant_inventory"
+      transaction_URL: "http://transaction:5009/transaction"
+      transaction_item_URL: "http://transaction_item:5010/transaction_item"
+      notification_URL: "http://notification:5011/notification"
+      voucher_URL: "http://voucher:5012/voucher"
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5013:5013"
+    networks:
+      - fooddelivery-net
+    depends_on:
+      - customer
+      - restaurant
+      - restaurant_inventory
+      - transaction
+      - transaction_item
+      - notification
+      - voucher

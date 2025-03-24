@@ -29,10 +29,11 @@ class Restaurant(db.Model):
     contact_number = db.Column(db.String(20), nullable=False)
     cuisine_type = db.Column(db.String(100), nullable=False)
     rating = db.Column(db.DECIMAL(2, 1), nullable=False, default=0.0)
+    image_url = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now)
 
     def __init__(self, restaurant_id, username, password_hash, name, latitude, longitude, 
-                contact_number, cuisine_type, rating=0.0):
+                contact_number, cuisine_type, image_url, rating=0.0):
         self.restaurant_id = restaurant_id
         self.username = username
         self.password_hash = password_hash
@@ -41,6 +42,7 @@ class Restaurant(db.Model):
         self.longitude = longitude
         self.contact_number = contact_number
         self.cuisine_type = cuisine_type
+        self.image_url = image_url
         self.rating = rating
 
     def json(self):
@@ -53,6 +55,7 @@ class Restaurant(db.Model):
             "contact_number": self.contact_number,
             "cuisine_type": self.cuisine_type,
             "rating": float(self.rating),
+            "image_url": self.image_url,
             "created_at": self.created_at.strftime('%Y-%m-%d %H:%M:%S')
         }
 
@@ -125,6 +128,18 @@ def create_restaurant(restaurant_id):
                     "code": 400,
                     "data": {"username": data.get('username')},
                     "message": "Username already exists.",
+                }
+            ),
+            400,
+        )
+    
+    # Check if image_url is provided
+    if 'image_url' not in data:
+        return (
+            jsonify(
+                {
+                    "code": 400,
+                    "message": "image_url field is required.",
                 }
             ),
             400,
@@ -319,6 +334,59 @@ def update_rating(restaurant_id):
                     "code": 500,
                     "data": {"restaurant_id": restaurant_id},
                     "message": "An error occurred updating restaurant rating: " + str(e),
+                }
+            ),
+            500,
+        )
+
+
+@app.route("/restaurant/image/<string:restaurant_id>", methods=["PUT"])
+def update_image(restaurant_id):
+    restaurant = db.session.scalar(db.select(Restaurant).filter_by(restaurant_id=restaurant_id))
+    
+    if not restaurant:
+        return (
+            jsonify(
+                {
+                    "code": 404,
+                    "data": {"restaurant_id": restaurant_id},
+                    "message": "Restaurant not found.",
+                }
+            ),
+            404,
+        )
+
+    data = request.get_json()
+    
+    if 'image_url' not in data:
+        return (
+            jsonify(
+                {
+                    "code": 400,
+                    "message": "image_url field is required.",
+                }
+            ),
+            400,
+        )
+
+    try:
+        restaurant.image_url = data['image_url']
+        db.session.commit()
+        return jsonify(
+            {
+                "code": 200,
+                "data": restaurant.json(),
+                "message": "Restaurant image updated successfully."
+            }
+        )
+    except Exception as e:
+        print("Exception:{}".format(str(e)))
+        return (
+            jsonify(
+                {
+                    "code": 500,
+                    "data": {"restaurant_id": restaurant_id},
+                    "message": "An error occurred updating restaurant image: " + str(e),
                 }
             ),
             500,

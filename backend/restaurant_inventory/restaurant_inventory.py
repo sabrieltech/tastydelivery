@@ -9,7 +9,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-     environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/fooddelivery1"
+    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/fooddelivery1"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_recycle': 299}
@@ -25,13 +25,15 @@ class RestaurantInventory(db.Model):
     item_name = db.Column(db.String(255), nullable=False)
     price = db.Column(db.DECIMAL(10, 2), nullable=False)
     stock_quantity = db.Column(db.Integer, nullable=False)
+    image_url = db.Column(db.String(255), nullable=True)
     last_updated = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now, onupdate=datetime.now)
 
-    def __init__(self, restaurant_id, item_name, price, stock_quantity):
+    def __init__(self, restaurant_id, item_name, price, stock_quantity, image_url=None):
         self.restaurant_id = restaurant_id
         self.item_name = item_name
         self.price = price
         self.stock_quantity = stock_quantity
+        self.image_url = image_url
 
     def json(self):
         return {
@@ -40,6 +42,7 @@ class RestaurantInventory(db.Model):
             "item_name": self.item_name,
             "price": float(self.price),
             "stock_quantity": self.stock_quantity,
+            "image_url": self.image_url,
             "last_updated": self.last_updated.strftime('%Y-%m-%d %H:%M:%S')
         }
 
@@ -94,7 +97,8 @@ def create_inventory_item():
         restaurant_id=data["restaurant_id"],
         item_name=data["item_name"],
         price=data["price"],
-        stock_quantity=data["stock_quantity"]
+        stock_quantity=data["stock_quantity"],
+        image_url=data.get("image_url")  # Handle optional image_url
     )
 
     try:

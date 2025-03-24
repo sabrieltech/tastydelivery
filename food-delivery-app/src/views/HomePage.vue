@@ -1,47 +1,35 @@
 <template>
   <div class="home">
-    <!-- Hero section -->
-    <section class="hero">
-      <div class="hero-content">
-        <h1>Order Delicious Food Online</h1>
-        <p>Fast delivery to your doorstep</p>
-        <button class="btn-primary">Order Now</button>
-      </div>
-      <div class="hero-image">
-        <img :src="heroImage" alt="Food Delivery" />
-      </div>
-    </section>
-    
+
     <!-- Featured restaurants section -->
     <section class="featured-restaurants">
       <h2>Popular Restaurants</h2>
-      <div class="restaurant-grid">
-        <div v-for="restaurant in featuredRestaurants" :key="restaurant.id" class="restaurant-card">
-          <img :src="restaurant.image" :alt="restaurant.name" />
+      <div v-if="isLoading" class="loading-container">
+        <p>Loading restaurants...</p>
+      </div>
+      <div v-else-if="error" class="error-container">
+        <p>{{ error }}</p>
+      </div>
+      <div v-else class="restaurant-grid">
+        <div v-for="restaurant in featuredRestaurants" :key="restaurant.restaurant_id" class="restaurant-card">
+          <img :src="restaurant.image_url" :alt="restaurant.name" />
           <h3>{{ restaurant.name }}</h3>
-          <p>{{ restaurant.cuisine }}</p>
+          <p>{{ restaurant.cuisine_type }}</p>
           <div class="restaurant-details">
-            <span>⭐ {{ restaurant.rating }}</span>
-            <span>🕒 {{ restaurant.deliveryTime }}</span>
+            <span><i class="fas fa-star"></i> {{ restaurant.rating }}</span>
+            <span><i class="fas fa-clock"></i> 30-45 min</span>
           </div>
+          <!-- Add View Menu Button -->
+          <router-link
+            :to="{ name: 'RestaurantMenu', params: { id: restaurant.restaurant_id } }"
+            class="btn-primary view-menu-btn"
+          >
+            View Menu
+          </router-link>
         </div>
       </div>
     </section>
     
-    <!-- App download section -->
-    <section class="app-download">
-      <div class="app-content">
-        <h2>Download Our Mobile App</h2>
-        <p>Get exclusive deals and faster ordering</p>
-        <div class="app-buttons">
-          <img :src="appStoreImage" alt="App Store" />
-          <img :src="googlePlayImage" alt="Google Play" />
-        </div>
-      </div>
-      <div class="app-image">
-        <img :src="mobileAppImage" alt="Mobile App" />
-      </div>
-    </section>
   </div>
 </template>
 
@@ -54,40 +42,42 @@ export default {
       appStoreImage: 'https://via.placeholder.com/150x50?text=App+Store',
       googlePlayImage: 'https://via.placeholder.com/150x50?text=Google+Play',
       mobileAppImage: 'https://via.placeholder.com/300x600?text=Mobile+App',
-      featuredRestaurants: [
-        {
-          id: 1,
-          name: 'Gourmet Delight',
-          cuisine: 'Italian',
-          rating: 4.5,
-          deliveryTime: '30-45 min',
-          image: 'https://via.placeholder.com/300x200?text=Gourmet+Delight'
-        },
-        {
-          id: 2,
-          name: 'Spicy Fusion',
-          cuisine: 'Indian',
-          rating: 4.2,
-          deliveryTime: '25-40 min',
-          image: 'https://via.placeholder.com/300x200?text=Spicy+Fusion'
-        },
-        {
-          id: 3,
-          name: 'Green Eats',
-          cuisine: 'Vegan',
-          rating: 4.8,
-          deliveryTime: '20-35 min',
-          image: 'https://via.placeholder.com/300x200?text=Green+Eats'
-        },
-        {
-          id: 4,
-          name: 'BBQ Haven',
-          cuisine: 'BBQ',
-          rating: 4.6,
-          deliveryTime: '35-50 min',
-          image: 'https://via.placeholder.com/300x200?text=BBQ+Haven'
+      featuredRestaurants: [],
+      isLoading: true,
+      error: null
+    }
+  },
+  mounted() {
+    this.fetchRestaurants();
+  },
+    methods: {
+    async fetchRestaurants() {
+      this.isLoading = true;
+      this.error = null;
+  
+      try {
+        const response = await fetch('http://localhost:5007/restaurant');
+        if (!response.ok) {
+          throw new Error(`Error fetching restaurants: ${response.statusText}`);
         }
-      ]
+  
+        const result = await response.json();
+  
+        if (result.code === 200 && result.data && result.data.restaurants) {
+          // Use all restaurants without limiting to the top 4
+          this.featuredRestaurants = result.data.restaurants.sort((a, b) => b.rating - a.rating);
+        } else {
+          this.error = 'No restaurants found';
+        }
+      } catch (error) {
+        console.error('Error fetching restaurants:', error);
+        this.error = 'Failed to load restaurants. Please try again later.';
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    redirectToLogin() {
+      this.$router.push('/login'); // Redirect to the LoginPage
     }
   }
 }
@@ -95,6 +85,28 @@ export default {
 
 <style scoped>
 /* Add your CSS styling here */
+
+.view-menu-btn {
+  display: block;
+  width: fit-content;
+  margin: 1rem auto;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.view-menu-btn:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
 .hero {
   display: flex;
   padding: 2rem;
@@ -116,6 +128,41 @@ export default {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-5px);
+}
+
+.restaurant-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.restaurant-card h3, .restaurant-card p {
+  padding: 0 1rem;
+  margin: 0.5rem 0;
+}
+
+.restaurant-details {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 1rem 1rem;
+  color: #666;
+}
+
+.loading-container, .error-container {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+}
+
+.error-container {
+  color: var(--danger-color, #dc3545);
 }
 
 .app-download {
