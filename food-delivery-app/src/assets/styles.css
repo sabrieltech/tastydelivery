@@ -1,0 +1,38 @@
+:root {
+  --primary-color: #007bff; /* Example red color */
+  --secondary-color: #333; /* Example secondary color */
+  --light-color: #f8f9fa; /* Example light background color */
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3; /* Slightly darker shade of primary color */
+  transform: scale(1.05); /* Slight zoom effect */
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: #fff;
+  border: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #222; /* Slightly darker shade of secondary color */
+  transform: scale(1.05); /* Slight zoom effect */
+}
