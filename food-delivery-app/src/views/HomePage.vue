@@ -39,9 +39,6 @@ export default {
   data() {
     return {
       heroImage: 'https://via.placeholder.com/500x300?text=Food+Delivery',
-      appStoreImage: 'https://via.placeholder.com/150x50?text=App+Store',
-      googlePlayImage: 'https://via.placeholder.com/150x50?text=Google+Play',
-      mobileAppImage: 'https://via.placeholder.com/300x600?text=Mobile+App',
       featuredRestaurants: [],
       isLoading: true,
       error: null

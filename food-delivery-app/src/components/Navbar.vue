@@ -21,6 +21,12 @@
         </template>
         <!-- Show user info and logout when user IS logged in -->
         <template v-else>
+          <!-- Order Now button that appears after login -->
+          <li class="navbar-button order-now-button">
+            <router-link to="/app/home" class="btn btn-primary order-now-btn">
+              <i class="fas fa-utensils"></i> Order Now
+            </router-link>
+          </li>
           <li class="user-info">
             <div class="user-dropdown">
               <span class="user-name" @click="toggleUserMenu">
@@ -67,21 +73,21 @@ export default {
       this.userMenuOpen = !this.userMenuOpen;
     },
     logout() {
-  // Clear user data from localStorage
-  localStorage.removeItem('currentUser');
-  localStorage.removeItem('isAuthenticated');
+      // Clear user data from localStorage
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('isAuthenticated');
 
-  // Reset the current user
-  this.currentUser = null;
+      // Reset the current user
+      this.currentUser = null;
 
-  // Close any open menus
-  this.userMenuOpen = false;
+      // Close any open menus
+      this.userMenuOpen = false;
 
-  // Redirect to home page
-  if (this.$route.path !== '/') {
-    this.$router.push('/');
-  }
-},
+      // Redirect to home page
+      if (this.$route.path !== '/') {
+        this.$router.push('/');
+      }
+    },
     checkUserSession() {
       // Get user data from localStorage
       const userData = localStorage.getItem('currentUser');
@@ -164,6 +170,35 @@ export default {
   font-size: 1.5rem;
   cursor: pointer;
 }
+
+/* Order Now button styles */
+.order-now-btn {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  border: 2px solid transparent;
+}
+
+.order-now-btn i {
+  margin-right: 0.5rem;
+}
+
+.order-now-btn:hover {
+  background-color: white;
+  color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid #0056b3;
+}
+
 
 /* User dropdown styles */
 .user-info {
@@ -249,6 +284,17 @@ export default {
     width: 100%;
     box-shadow: none;
     margin-top: 0.5rem;
+  }
+  
+  /* Mobile-specific styles for Order Now button */
+  .order-now-button {
+    width: 80%;
+    margin: 0.5rem auto;
+  }
+  
+  .order-now-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

@@ -1,0 +1,170 @@
+{
+	"info": {
+		"_postman_id": "d4e5f6g7-h8i9-j0k1-l2m3-n4o5p6q7r8s9",
+		"name": "Food Delivery - Personalized Homepage Service",
+		"description": "API collection for testing the Personalized Homepage microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Personalized Homepage for Customer",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5013/personalized_homepage/CUST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5013",
+					"path": [
+						"personalized_homepage",
+						"CUST001"
+					]
+				},
+				"description": "Retrieves personalized homepage data for customer CUST001, including customer info, recommended restaurants, recent orders, vouchers, and notifications"
+			}
+		},
+		{
+			"name": "Get Personalized Homepage - Silver Tier (CUST001)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5013/personalized_homepage/CUST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5013",
+					"path": [
+						"personalized_homepage",
+						"CUST001"
+					]
+				},
+				"description": "Retrieves personalized homepage data for a Silver tier customer (CUST001)"
+			}
+		},
+		{
+			"name": "Get Personalized Homepage - Gold Tier (CUST002)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5013/personalized_homepage/CUST002",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5013",
+					"path": [
+						"personalized_homepage",
+						"CUST002"
+					]
+				},
+				"description": "Retrieves personalized homepage data for a Gold tier customer (CUST002)"
+			}
+		},
+		{
+			"name": "Get Personalized Homepage - Bronze Tier (CUST003)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5013/personalized_homepage/CUST003",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5013",
+					"path": [
+						"personalized_homepage",
+						"CUST003"
+					]
+				},
+				"description": "Retrieves personalized homepage data for a Bronze tier customer (CUST003)"
+			}
+		},
+		{
+			"name": "Get Personalized Homepage - Invalid Customer ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5013/personalized_homepage/INVALID_ID",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5013",
+					"path": [
+						"personalized_homepage",
+						"INVALID_ID"
+					]
+				},
+				"description": "Tests error handling for an invalid customer ID"
+			}
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Basic response validation for personalized homepage endpoints",
+					"if (pm.response.code === 200) {",
+					"    var jsonData = pm.response.json();",
+					"    ",
+					"    // Check if the response structure is correct",
+					"    pm.test(\"Response has correct structure\", function() {",
+					"        pm.expect(jsonData).to.have.property('code');",
+					"        pm.expect(jsonData).to.have.property('data');",
+					"        pm.expect(jsonData.data).to.be.an('object');",
+					"    });",
+					"    ",
+					"    // Check for expected data sections",
+					"    pm.test(\"Response contains expected data sections\", function() {",
+					"        pm.expect(jsonData.data).to.have.property('customerInfo');",
+					"        pm.expect(jsonData.data).to.have.property('recommendedRestaurants');",
+					"        // Other sections might be empty arrays but should exist",
+					"        pm.expect(jsonData.data).to.have.property('recentOrders');",
+					"        pm.expect(jsonData.data).to.have.property('vouchers');",
+					"        pm.expect(jsonData.data).to.have.property('notifications');",
+					"    });",
+					"    ",
+					"    // Validate customer info if available",
+					"    if (jsonData.data.customerInfo) {",
+					"        pm.test(\"Customer info is valid\", function() {",
+					"            pm.expect(jsonData.data.customerInfo).to.have.property('name');",
+					"            pm.expect(jsonData.data.customerInfo).to.have.property('email');",
+					"            pm.expect(jsonData.data.customerInfo).to.have.property('loyalty_status');",
+					"            pm.expect(jsonData.data.customerInfo).to.have.property('loyalty_points');",
+					"        });",
+					"    }",
+					"    ",
+					"    // Validate recommended restaurants if available",
+					"    if (jsonData.data.recommendedRestaurants && jsonData.data.recommendedRestaurants.length > 0) {",
+					"        pm.test(\"Recommended restaurants are valid\", function() {",
+					"            pm.expect(jsonData.data.recommendedRestaurants[0]).to.have.property('id');",
+					"            pm.expect(jsonData.data.recommendedRestaurants[0]).to.have.property('name');",
+					"            pm.expect(jsonData.data.recommendedRestaurants[0]).to.have.property('cuisine');",
+					"            pm.expect(jsonData.data.recommendedRestaurants[0]).to.have.property('rating');",
+					"        });",
+					"    }",
+					"}"
+				]
+			}
+		}
+	]
+}

@@ -84,7 +84,7 @@
                 <div v-if="item.stock_quantity > 0">
                   <button 
                     class="btn btn-primary add-to-cart" 
-                    v-if="isLoggedIn" 
+                    v-if="!isHomePage" 
                     @click="addToCart(item)"
                   >
                     <i class="fas fa-plus"></i> Add
@@ -144,10 +144,6 @@ export default {
   computed: {
     restaurantId() {
       return this.$route.params.id;
-    },
-    isLoggedIn() {
-      // Check if user is authenticated (coming from AppHomePage)
-      return localStorage.getItem('isAuthenticated') === 'true';
     }
   },
   methods: {
@@ -193,16 +189,10 @@ export default {
         }
         
         const menuResult = await menuResponse.json();
-        
+        console.log(menuResult);
         if (menuResult.code === 200) {
+          this.menuItems = Array.isArray(this.menuItems) ? this.menuItems : [];
           this.menuItems = menuResult.data.inventory_items;
-          
-          // Add description field if missing
-          this.menuItems = this.menuItems.map(item => ({
-            ...item,
-            description: item.description || `Delicious ${item.item_name} prepared with the finest ingredients.`
-          }));
-          
           this.filteredMenuItems = [...this.menuItems];
           
           // Extract unique categories
@@ -268,7 +258,7 @@ export default {
       this.updateCartTotals();
       
       // Show success notification (in a real app)
-      console.log(`Added ${item.item_name} to cart`);
+      // this.$toast.success(`Added ${item.item_name} to cart`);
     },
     
     updateCartTotals() {
@@ -284,9 +274,6 @@ export default {
   },
   mounted() {
     this.fetchData();
-    
-    // Check referrer or source (this is a simplified approach)
-    console.log('User is logged in:', this.isLoggedIn);
   },
   watch: {
     // Re-fetch data if restaurant ID changes
