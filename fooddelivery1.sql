@@ -157,77 +157,100 @@ VALUES
 ('REST002', 'Naan', 2.49, 100, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//naan.jpg', NOW());
 
 
-INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
-('REST003', 'Vegan Buddha Bowl', 9.99, 40, NOW()),
-('REST003', 'Tofu Stir Fry', 8.99, 0, NOW()),
-('REST003', 'Vegan Tacos', 10.49, 30, NOW()),
-('REST003', 'Lentil Soup', 7.99, 40, NOW()),
-('REST003', 'Vegan Burrito', 11.49, 30, NOW()),
-('REST003', 'Falafel Wrap', 9.29, 35, NOW()),
-('REST003', 'Avocado Toast', 7.49, 40, NOW());
+INSERT INTO `restaurant_inventory` 
+(`restaurant_id`, `item_name`, `price`, `stock_quantity`, `image_url`, `last_updated`) 
+VALUES
+('REST003', 'Vegan Buddha Bowl', 9.99, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST003', 'Tofu Stir Fry', 8.99, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST003', 'Vegan Tacos', 10.49, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST003', 'Lentil Soup', 7.99, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST003', 'Vegan Burrito', 11.49, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST003', 'Falafel Wrap', 9.29, 35, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST003', 'Avocado Toast', 7.49, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW());
 
-INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
-('REST004', 'Pulled Pork Sandwich', 9.99, 40, NOW()),
-('REST004', 'BBQ Chicken Wings', 10.49, 0, NOW()),
-('REST004', 'Mac & Cheese', 5.99, 60, NOW()),
-('REST004', 'Smoked Brisket', 14.99, 30, NOW()),
-('REST004', 'Grilled Corn', 3.49, 70, NOW()),
-('REST004', 'BBQ Pulled Jackfruit', 8.49, 35, NOW()),
-('REST004', 'Potato Salad', 4.99, 40, NOW());
+-- Update REST004 items
+INSERT INTO `restaurant_inventory` 
+(`restaurant_id`, `item_name`, `price`, `stock_quantity`, `image_url`, `last_updated`) 
+VALUES
+('REST004', 'Pulled Pork Sandwich', 9.99, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST004', 'BBQ Chicken Wings', 10.49, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST004', 'Mac & Cheese', 5.99, 60, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST004', 'Smoked Brisket', 14.99, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST004', 'Grilled Corn', 3.49, 70, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST004', 'BBQ Pulled Jackfruit', 8.49, 35, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST004', 'Potato Salad', 4.99, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW());
 
-INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
-('REST005', 'Dragon Roll', 13.99, 40, NOW()),
-('REST005', 'Tuna Sashimi', 12.49, 0, NOW()),
-('REST005', 'Shrimp Tempura', 9.99, 50, NOW()),
-('REST005', 'Ramen', 10.99, 40, NOW()),
-('REST005', 'Katsu Curry', 11.49, 30, NOW()),
-('REST005', 'Takoyaki', 6.49, 60, NOW()),
-('REST005', 'Onigiri', 3.99, 70, NOW());
+-- Update REST005 items
+INSERT INTO `restaurant_inventory` 
+(`restaurant_id`, `item_name`, `price`, `stock_quantity`, `image_url`, `last_updated`) 
+VALUES
+('REST005', 'Dragon Roll', 13.99, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST005', 'Tuna Sashimi', 12.49, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST005', 'Shrimp Tempura', 9.99, 50, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST005', 'Ramen', 10.99, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST005', 'Katsu Curry', 11.49, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST005', 'Takoyaki', 6.49, 60, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST005', 'Onigiri', 3.99, 70, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW());
 
-INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
-('REST006', 'Croissant', 2.99, 100, NOW()),
-('REST006', 'Quiche Lorraine', 8.99, 50, NOW()),
-('REST006', 'Beef Bourguignon', 15.49, 0, NOW()),
-('REST006', 'French Onion Soup', 6.99, 40, NOW()),
-('REST006', 'Ratatouille', 10.49, 30, NOW()),
-('REST006', 'Crepe Suzette', 7.99, 40, NOW()),
-('REST006', 'Escargot', 12.99, 25, NOW());
+-- Update REST006 items
+INSERT INTO `restaurant_inventory` 
+(`restaurant_id`, `item_name`, `price`, `stock_quantity`, `image_url`, `last_updated`) 
+VALUES
+('REST006', 'Croissant', 2.99, 100, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST006', 'Quiche Lorraine', 8.99, 50, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST006', 'Beef Bourguignon', 15.49, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST006', 'French Onion Soup', 6.99, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST006', 'Ratatouille', 10.49, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST006', 'Crepe Suzette', 7.99, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST006', 'Escargot', 12.99, 25, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW());
 
-INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
-('REST007', 'Pad Thai', 9.99, 50, NOW()),
-('REST007', 'Green Curry', 10.49, 30, NOW()),
-('REST007', 'Tom Yum Soup', 8.49, 0, NOW()),
-('REST007', 'Mango Sticky Rice', 5.99, 70, NOW()),
-('REST007', 'Spring Rolls', 4.49, 60, NOW()),
-('REST007', 'Papaya Salad', 7.49, 50, NOW()),
-('REST007', 'Thai Milk Tea', 3.99, 80, NOW());
+-- Update REST007 items
+INSERT INTO `restaurant_inventory` 
+(`restaurant_id`, `item_name`, `price`, `stock_quantity`, `image_url`, `last_updated`) 
+VALUES
+('REST007', 'Pad Thai', 9.99, 50, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST007', 'Green Curry', 10.49, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST007', 'Tom Yum Soup', 8.49, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST007', 'Mango Sticky Rice', 5.99, 70, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST007', 'Spring Rolls', 4.49, 60, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST007', 'Papaya Salad', 7.49, 50, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST007', 'Thai Milk Tea', 3.99, 80, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW());
 
-INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
-('REST008', 'Tacos Al Pastor', 10.49, 50, NOW()),
-('REST008', 'Burrito Bowl', 11.49, 0, NOW()),
-('REST008', 'Enchiladas', 9.99, 40, NOW()),
-('REST008', 'Quesadilla', 8.49, 30, NOW()),
-('REST008', 'Nachos Supreme', 6.99, 0, NOW()),
-('REST008', 'Guacamole', 4.99, 60, NOW()),
-('REST008', 'Horchata', 3.99, 80, NOW());
+-- Update REST008 items
+INSERT INTO `restaurant_inventory` 
+(`restaurant_id`, `item_name`, `price`, `stock_quantity`, `image_url`, `last_updated`) 
+VALUES
+('REST008', 'Tacos Al Pastor', 10.49, 50, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST008', 'Burrito Bowl', 11.49, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST008', 'Enchiladas', 9.99, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST008', 'Quesadilla', 8.49, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST008', 'Nachos Supreme', 6.99, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST008', 'Guacamole', 4.99, 60, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST008', 'Horchata', 3.99, 80, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW());
 
-INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
-('REST009', 'Bibimbap', 9.99, 0, NOW()),
-('REST009', 'Kimchi Fried Rice', 8.49, 50, NOW()),
-('REST009', 'Tteokbokki', 6.99, 0, NOW()),
-('REST009', 'Bulgogi', 12.49, 30, NOW()),
-('REST009', 'Korean Fried Chicken', 11.49, 40, NOW()),
-('REST009', 'Japchae', 10.49, 30, NOW()),
-('REST009', 'Soju', 3.99, 70, NOW());
+-- Update REST009 items
+INSERT INTO `restaurant_inventory` 
+(`restaurant_id`, `item_name`, `price`, `stock_quantity`, `image_url`, `last_updated`) 
+VALUES
+('REST009', 'Bibimbap', 9.99, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST009', 'Kimchi Fried Rice', 8.49, 50, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST009', 'Tteokbokki', 6.99, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST009', 'Bulgogi', 12.49, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST009', 'Korean Fried Chicken', 11.49, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST009', 'Japchae', 10.49, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST009', 'Soju', 3.99, 70, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW());
 
-INSERT INTO `restaurant_inventory` (`restaurant_id`, `item_name`, `price`, `stock_quantity`, `last_updated`) VALUES
-('REST010', 'Falafel Platter', 9.49, 50, NOW()),
-('REST010', 'Hummus & Pita', 7.99, 0, NOW()),
-('REST010', 'Greek Salad', 8.49, 70, NOW()),
-('REST010', 'Shawarma Wrap', 9.99, 40, NOW()),
-('REST010', 'Baklava', 5.99, 30, NOW()),
-('REST010', 'Tabbouleh', 6.49, 50, NOW()),
-('REST010', 'Lemon Mint Drink', 3.99, 0, NOW());
+-- Update REST010 items
+INSERT INTO `restaurant_inventory` 
+(`restaurant_id`, `item_name`, `price`, `stock_quantity`, `image_url`, `last_updated`) 
+VALUES
+('REST010', 'Falafel Platter', 9.49, 50, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST010', 'Hummus & Pita', 7.99, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST010', 'Greek Salad', 8.49, 70, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST010', 'Shawarma Wrap', 9.99, 40, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST010', 'Baklava', 5.99, 30, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST010', 'Tabbouleh', 6.49, 50, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW()),
+('REST010', 'Lemon Mint Drink', 3.99, 0, 'https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg', NOW());
 
 
 --
@@ -255,9 +278,15 @@ INSERT INTO `voucher` (`voucher_id`, `code`, `discount_percentage`, `max_discoun
 ('VOUCH001', 'DISCOUNT10', 10.00, 5.00, '2025-12-31', 'Active', 'CUST001', NOW()),
 ('VOUCH002', 'WELCOME5', 5.00, 3.00, '2025-11-30', 'Active', 'CUST001', NOW()),
 ('VOUCH003', 'GOLD15', 15.00, 7.50, '2025-12-31', 'Active', 'CUST002', NOW()),
-('VOUCH004', 'FREESHIP', 10.00, 5.00, '2025-10-31', 'Active', 'CUST002', NOW()),
+('VOUCH004', 'FREESHIP10', 10.00, 5.00, '2025-10-31', 'Active', 'CUST002', NOW()),
 ('VOUCH005', 'BRONZE3', 3.00, 2.00, '2025-09-30', 'Active', 'CUST003', NOW()),
-('VOUCH006', 'LOYALTY7', 7.00, 4.00, '2025-12-31', 'Active', 'CUST003', NOW());
+('VOUCH006', 'LOYALTY7', 7.00, 4.00, '2025-12-31', 'Active', 'CUST003', NOW()),
+('VOUCH007', 'SILVER10', 10.00, 5.00, '2025-12-31', 'Active', 'CUST001', NOW()),
+('VOUCH008', 'FLASH20', 20.00, 10.00, '2025-11-30', 'Active', 'CUST001', NOW()),
+('VOUCH009', 'SPEND50', 15.00, 7.50, '2025-12-31', 'Active', 'CUST001', NOW()),
+('VOUCH010', 'BIGSAVE', 5.00, 3.00, '2025-10-31', 'Active', 'CUST002', NOW()),
+('VOUCH011', 'EXTRASAVER', 7.00, 4.00, '2025-12-31', 'Active', 'CUST003', NOW());
+
 
 --
 -- Table structure for table `rider`
@@ -348,26 +377,37 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   PRIMARY KEY (`transaction_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
 --
 -- Dumping data for table `transaction`
 --
 
 INSERT INTO `transaction` (`transaction_id`, `customer_id`, `food_cost`, `delivery_cost`, `loyalty_discount_percentage`, `total_price_after_discount`, `loyalty_points_added`, `current_loyalty_points`, `current_loyalty_status`, `status`, `voucher_id`, `rider_id`, `created_at`, `updated_at`) VALUES
-('TRANS001', 'CUST001', 25.00, 5.00, 5.00, 28.50, 10, 130, 'Silver', 'Paid', NULL, 'RIDER001', NOW(), NOW()),
-('TRANS002', 'CUST001', 15.00, 4.00, 5.00, 18.05, 8, 138, 'Silver', 'Paid', 'VOUCH001', 'RIDER002', NOW(), NOW()),
-('TRANS003', 'CUST001', 40.00, 6.00, 5.00, 43.70, 15, 153, 'Silver', 'Pending', NULL, NULL, NOW(), NOW()),
-('TRANS004', 'CUST001', 30.00, 5.50, 5.00, 33.53, 12, 165, 'Silver', 'Submitted', 'VOUCH002', 'RIDER003', NOW(), NOW()),
-('TRANS005', 'CUST001', 20.00, 4.50, 5.00, 23.28, 9, 174, 'Silver', 'Cancelled', NULL, NULL, NOW(), NOW()),
-('TRANS006', 'CUST002', 22.00, 5.50, 10.00, 24.75, 20, 320, 'Gold', 'Paid', 'VOUCH003', 'RIDER002', NOW(), NOW()),
-('TRANS007', 'CUST002', 18.00, 4.00, 10.00, 19.80, 18, 338, 'Gold', 'Submitted', NULL, 'RIDER001', NOW(), NOW()),
-('TRANS008', 'CUST002', 50.00, 7.00, 10.00, 57.60, 25, 363, 'Gold', 'Pending', NULL, NULL, NOW(), NOW()),
-('TRANS009', 'CUST002', 28.00, 5.00, 10.00, 29.70, 22, 385, 'Gold', 'Paid', NULL, 'RIDER003', NOW(), NOW()),
-('TRANS010', 'CUST002', 35.00, 6.00, 10.00, 37.80, 30, 415, 'Gold', 'Refunded', 'VOUCH004', NULL, NOW(), NOW()),
-('TRANS011', 'CUST003', 19.00, 4.50, 0.00, 23.50, 5, 55, 'Bronze', 'Paid', NULL, 'RIDER001', NOW(), NOW()),
-('TRANS012', 'CUST003', 21.00, 5.00, 0.00, 26.00, 7, 62, 'Bronze', 'Submitted', 'VOUCH005', 'RIDER002', NOW(), NOW()),
-('TRANS013', 'CUST003', 45.00, 7.50, 0.00, 52.50, 12, 74, 'Bronze', 'Pending', NULL, NULL, NOW(), NOW()),
-('TRANS014', 'CUST003', 33.00, 6.50, 0.00, 39.50, 10, 84, 'Bronze', 'Paid', NULL, 'RIDER003', NOW(), NOW()),
-('TRANS015', 'CUST003', 12.00, 3.50, 0.00, 15.50, 4, 88, 'Bronze', 'Cancelled', NULL, NULL, NOW(), NOW());
+('TRANS001', 'CUST001', 10.99, 5.00, 5.00, 15.24, 10, 130, 'Silver', 'Paid', NULL, 'RIDER001', '2025-03-02 17:34:24', '2025-03-02 17:34:24'),
+('TRANS002', 'CUST001', 4.99, 4.00, 5.00, 8.54, 8, 138, 'Silver', 'Paid', 'VOUCH001', 'RIDER002', '2025-03-14 11:21:07', '2025-03-14 11:21:07'),
+('TRANS003', 'CUST001', 7.49, 6.00, 5.00, 12.82, 15, 153, 'Silver', 'Pending', NULL, NULL, '2025-03-29 16:34:17', '2025-03-29 16:34:17'),
+('TRANS004', 'CUST001', 5.99, 5.50, 5.00, 10.91, 12, 165, 'Silver', 'Submitted', 'VOUCH002', 'RIDER003', '2025-03-22 06:16:45', '2025-03-22 06:16:45'),
+('TRANS005', 'CUST001', 12.49, 4.50, 5.00, 16.14, 9, 174, 'Silver', 'Cancelled', NULL, NULL, '2025-03-07 15:29:16', '2025-03-07 15:29:16'),
+('TRANS006', 'CUST002', 13.49, 5.50, 10.00, 17.09, 20, 320, 'Gold', 'Paid', 'VOUCH003', 'RIDER002', '2025-03-27 11:25:33', '2025-03-27 11:25:33'),
+('TRANS007', 'CUST002', 8.99, 4.00, 10.00, 11.69, 18, 338, 'Gold', 'Submitted', NULL, 'RIDER001', '2025-03-09 05:40:11', '2025-03-09 05:40:11'),
+('TRANS008', 'CUST002', 9.99, 7.00, 10.00, 15.29, 25, 363, 'Gold', 'Pending', NULL, NULL, '2025-03-21 18:51:28', '2025-03-21 18:51:28'),
+('TRANS009', 'CUST002', 14.99, 5.00, 10.00, 17.99, 22, 385, 'Gold', 'Paid', NULL, 'RIDER003', '2025-03-19 21:58:44', '2025-03-19 21:58:44'),
+('TRANS010', 'CUST002', 11.49, 6.00, 10.00, 15.74, 30, 415, 'Gold', 'Refunded', 'VOUCH004', NULL, '2025-03-22 19:23:45', '2025-03-22 19:23:45'),
+('TRANS011', 'CUST003', 5.49, 4.50, 0.00, 9.99, 5, 55, 'Bronze', 'Paid', NULL, 'RIDER001', '2025-03-14 17:41:06', '2025-03-14 17:41:06'),
+('TRANS012', 'CUST003', 3.49, 5.00, 0.00, 8.49, 7, 62, 'Bronze', 'Submitted', 'VOUCH005', 'RIDER002', '2025-03-03 11:01:39', '2025-03-03 11:01:39'),
+('TRANS013', 'CUST003', 8.99, 7.50, 0.00, 16.49, 12, 74, 'Bronze', 'Pending', NULL, NULL, '2025-03-22 00:55:31', '2025-03-22 00:55:31'),
+('TRANS014', 'CUST003', 3.49, 6.50, 0.00, 9.99, 10, 84, 'Bronze', 'Paid', NULL, 'RIDER003', '2025-03-08 05:01:33', '2025-03-08 05:01:33'),
+('TRANS015', 'CUST003', 8.49, 3.50, 0.00, 11.99, 4, 88, 'Bronze', 'Cancelled', NULL, NULL, '2025-03-16 09:08:45', '2025-03-16 09:08:45'),
+('TRANS017', 'CUST001', 53.44, 4.50, 5.00, 55.03, 10, 199, 'Silver', 'Paid', 'VOUCH007', 'RIDER001', '2025-03-11 14:53:22', '2025-03-11 14:53:22'),
+('TRANS018', 'CUST001', 49.93, 5.00, 5.00, 52.18, 12, 211, 'Silver', 'Paid', 'VOUCH008', 'RIDER002', '2025-03-07 10:00:26', '2025-03-07 10:00:26'),
+('TRANS019', 'CUST001', 58.93, 3.50, 5.00, 59.31, 9, 220, 'Silver', 'Submitted', NULL, 'RIDER003', '2025-03-22 08:38:32', '2025-03-22 08:38:32'),
+('TRANS020', 'CUST001', 53.94, 4.00, 5.00, 54.94, 8, 228, 'Silver', 'Pending', NULL, NULL, '2025-03-22 13:38:44', '2025-03-22 13:38:44'),
+('TRANS021', 'CUST001', 57.44, 5.50, 5.00, 59.79, 11, 239, 'Silver', 'Paid', 'VOUCH009', 'RIDER001', '2025-03-01 06:14:40', '2025-03-01 06:14:40'),
+('TRANS022', 'CUST001', 58.94, 6.00, 5.00, 61.74, 15, 254, 'Silver', 'Submitted', 'VOUCH010', 'RIDER002', '2025-03-06 18:18:51', '2025-03-06 18:18:51'),
+('TRANS023', 'CUST001', 41.44, 3.00, 5.00, 42.22, 7, 261, 'Silver', 'Pending', NULL, NULL, '2025-03-23 01:44:53', '2025-03-23 01:44:53'),
+('TRANS024', 'CUST001', 53.44, 5.00, 5.00, 55.52, 13, 274, 'Silver', 'Paid', 'VOUCH011', 'RIDER003', '2025-03-01 21:24:53', '2025-03-01 21:24:53'),
+('TRANS025', 'CUST001', 53.44, 4.50, 5.00, 55.03, 10, 284, 'Silver', 'Refunded', NULL, NULL, '2025-03-09 17:56:43', '2025-03-09 17:56:43');
+
 
 --
 -- Table structure for table `transaction_item`
@@ -391,21 +431,57 @@ CREATE TABLE IF NOT EXISTS `transaction_item` (
 --
 
 INSERT INTO `transaction_item` (`transaction_id`, `restaurant_id`, `item_id`, `quantity`, `price_per_item`, `total_price`, `created_at`) VALUES
-('TRANS001', 'REST001', 1, 1, 12.99, 12.99, NOW()),
-('TRANS002', 'REST002', 4, 1, 9.99, 9.99, NOW()),
-('TRANS003', 'REST003', 7, 1, 14.99, 14.99, NOW()),
-('TRANS004', 'REST004', 10, 1, 19.99, 19.99, NOW()),
-('TRANS005', 'REST005', 13, 1, 8.99, 8.99, NOW()),
-('TRANS006', 'REST001', 2, 1, 6.99, 6.99, NOW()),
-('TRANS007', 'REST002', 5, 1, 7.99, 7.99, NOW()),
-('TRANS008', 'REST003', 8, 1, 11.99, 11.99, NOW()),
-('TRANS009', 'REST004', 11, 1, 13.99, 13.99, NOW()),
-('TRANS010', 'REST005', 14, 1, 9.49, 9.49, NOW()),
-('TRANS011', 'REST001', 3, 1, 10.99, 10.99, NOW()),
-('TRANS012', 'REST002', 6, 1, 5.99, 5.99, NOW()),
-('TRANS013', 'REST003', 9, 1, 7.49, 7.49, NOW()),
-('TRANS014', 'REST004', 12, 1, 15.99, 15.99, NOW()),
-('TRANS015', 'REST005', 15, 1, 12.49, 12.49, NOW());
+('TRANS001', 'REST001', 1, 1, 10.99, 10.99, NOW()),
+('TRANS002', 'REST002', 4, 1, 4.99, 4.99, NOW()),
+('TRANS003', 'REST003', 7, 1, 7.49, 7.49, NOW()),
+('TRANS004', 'REST004', 10, 1, 5.99, 5.99, NOW()),
+('TRANS005', 'REST005', 13, 1, 12.49, 12.49, NOW()),
+('TRANS006', 'REST001', 2, 1, 13.49, 13.49, NOW()),
+('TRANS007', 'REST002', 5, 1, 8.99, 8.99, NOW()),
+('TRANS008', 'REST003', 8, 1, 9.99, 9.99, NOW()),
+('TRANS009', 'REST004', 11, 1, 14.99, 14.99, NOW()),
+('TRANS010', 'REST005', 14, 1, 11.49, 11.49, NOW()),
+('TRANS011', 'REST001', 3, 1, 5.49, 5.49, NOW()),
+('TRANS012', 'REST002', 6, 1, 3.49, 3.49, NOW()),
+('TRANS013', 'REST003', 9, 1, 8.99, 8.99, NOW()),
+('TRANS014', 'REST004', 12, 1, 3.49, 3.49, NOW()),
+('TRANS015', 'REST001', 15, 1, 8.49, 8.49, NOW()),
+('TRANS017', 'REST001', 1, 1, 10.99, 10.99, NOW()),
+('TRANS017', 'REST001', 2, 2, 13.49, 26.98, NOW()),
+('TRANS017', 'REST001', 3, 1, 5.49, 5.49, NOW()),
+('TRANS017', 'REST001', 4, 2, 4.99, 9.98, NOW()),
+('TRANS018', 'REST001', 5, 1, 8.99, 8.99, NOW()),
+('TRANS018', 'REST008', 30, 1, 9.99, 9.99, NOW()),
+('TRANS018', 'REST008', 31, 2, 8.49, 16.98, NOW()),
+('TRANS018', 'REST008', 32, 2, 6.99, 13.98, NOW()),
+('TRANS019', 'REST009', 33, 1, 9.99, 9.99, NOW()),
+('TRANS019', 'REST009', 34, 2, 8.49, 16.98, NOW()),
+('TRANS019', 'REST009', 35, 1, 6.99, 6.99, NOW()),
+('TRANS019', 'REST009', 36, 2, 12.49, 24.98, NOW()),
+('TRANS020', 'REST010', 37, 1, 9.49, 9.49, NOW()),
+('TRANS020', 'REST010', 38, 2, 7.99, 15.98, NOW()),
+('TRANS020', 'REST010', 39, 1, 8.49, 8.49, NOW()),
+('TRANS020', 'REST010', 40, 2, 9.99, 19.98, NOW()),
+('TRANS021', 'REST004', 11, 1, 14.99, 14.99, NOW()),
+('TRANS021', 'REST004', 12, 2, 3.49, 6.98, NOW()),
+('TRANS021', 'REST004', 13, 1, 12.49, 12.49, NOW()),
+('TRANS021', 'REST004', 14, 2, 11.49, 22.98, NOW()),
+('TRANS022', 'REST009', 33, 1, 9.99, 9.99, NOW()),
+('TRANS022', 'REST009', 34, 2, 8.49, 16.98, NOW()),
+('TRANS022', 'REST009', 35, 1, 6.99, 6.99, NOW()),
+('TRANS022', 'REST009', 36, 2, 12.49, 24.98, NOW()),
+('TRANS023', 'REST002', 4, 1, 4.99, 4.99, NOW()),
+('TRANS023', 'REST002', 5, 2, 8.99, 17.98, NOW()),
+('TRANS023', 'REST002', 6, 1, 3.49, 3.49, NOW()),
+('TRANS023', 'REST002', 7, 2, 7.49, 14.98, NOW()),
+('TRANS024', 'REST001', 1, 1, 10.99, 10.99, NOW()),
+('TRANS024', 'REST001', 2, 2, 13.49, 26.98, NOW()),
+('TRANS024', 'REST001', 3, 1, 5.49, 5.49, NOW()),
+('TRANS024', 'REST001', 4, 2, 4.99, 9.98, NOW()),
+('TRANS025', 'REST001', 1, 1, 10.99, 10.99, NOW()),
+('TRANS025', 'REST001', 2, 2, 13.49, 26.98, NOW()),
+('TRANS025', 'REST001', 3, 1, 5.49, 5.49, NOW()),
+('TRANS025', 'REST001', 4, 2, 4.99, 9.98, NOW());
 
 -- Add foreign keys to the transaction table
 ALTER TABLE `transaction` 

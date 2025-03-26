@@ -148,7 +148,7 @@ def get_customer_info(customer_id):
     return customer_result
 
 
-def get_recent_transactions(customer_id, limit=5):
+def get_recent_transactions(customer_id):
     """Get recent transactions for a customer"""
     print('\n-----Invoking transaction microservice-----')
     transactions_result = invoke_http(f"{transaction_URL}/customer/{customer_id}", method='GET')
@@ -165,7 +165,7 @@ def get_recent_transactions(customer_id, limit=5):
         )
         
         # Limit to specified number of transactions
-        transactions_result["data"]["transactions"] = sorted_transactions[:limit]
+        transactions_result["data"]["transactions"] = sorted_transactions
     
     return transactions_result
 
@@ -320,9 +320,8 @@ def get_unread_notifications(customer_id):
     
     return notifications_result
 
-
-def get_recommended_restaurants(customer_id, recent_orders, limit=4):
-    """Get recommended restaurants based on recent orders and preferences"""
+def get_recommended_restaurants(customer_id, recent_orders):
+    """Get recommended restaurants sorted by highest rating"""
     try:
         # 1. Get list of all restaurants
         print('\n-----Invoking restaurant microservice for all restaurants-----')
@@ -335,80 +334,30 @@ def get_recommended_restaurants(customer_id, recent_orders, limit=4):
         
         all_restaurants = restaurants_result["data"]["restaurants"]
         
-        # 2. Calculate recommendations
-        # For simplicity: Sort by rating (highest first) and exclude recently ordered restaurants
+        # 2. Sort restaurants by rating (highest first)
+        sorted_restaurants = sorted(all_restaurants, key=lambda x: float(x["rating"]), reverse=True)
         
-        # Get IDs of recently ordered restaurants
-        recent_restaurant_ids = set()
-        for order in recent_orders:
-            if "restaurant_ids" in order:
-                recent_restaurant_ids.update(order["restaurant_ids"])
+        # 3. Take top restaurants up to the limit
+        top_restaurants = sorted_restaurants
         
-        # Filter and sort restaurants
-        # First priority: Restaurants not recently ordered
-        # Second priority: Highest rated restaurants
-        non_recent_restaurants = [r for r in all_restaurants if r["restaurant_id"] not in recent_restaurant_ids]
-        recent_restaurants = [r for r in all_restaurants if r["restaurant_id"] in recent_restaurant_ids]
-        
-        # Sort both lists by rating (highest first)
-        non_recent_restaurants = sorted(non_recent_restaurants, key=lambda x: float(x["rating"]), reverse=True)
-        recent_restaurants = sorted(recent_restaurants, key=lambda x: float(x["rating"]), reverse=True)
-        
-        # Combine lists, prioritizing non-recent restaurants
-        recommended = non_recent_restaurants + recent_restaurants
-        
-        # Format for frontend
+        # 4. Format for frontend
         processed_restaurants = []
-        for r in recommended[:limit]:
+        for r in top_restaurants:
             processed_restaurants.append({
                 "id": r["restaurant_id"],
                 "name": r["name"],
                 "cuisine": r["cuisine_type"],
                 "rating": float(r["rating"]),
                 "deliveryTime": "30-45 min",  # Placeholder - could calculate based on distance
-                "image": f"https://via.placeholder.com/300x200?text={r['name'].replace(' ', '+')}"
+                "image_url": r["image_url"]
             })
         
         return processed_restaurants
     
     except Exception as e:
         print(f"Error getting recommended restaurants: {str(e)}")
-        # Return a set of default restaurants on error
-        return [
-            {
-                "id": "r1",
-                "name": "Gourmet Delight",
-                "cuisine": "Italian",
-                "rating": 4.5,
-                "deliveryTime": "30-45 min",
-                "image": "https://via.placeholder.com/300x200?text=Gourmet+Delight"
-            },
-            {
-                "id": "r2",
-                "name": "Spicy Fusion",
-                "cuisine": "Indian",
-                "rating": 4.2,
-                "deliveryTime": "25-40 min",
-                "image": "https://via.placeholder.com/300x200?text=Spicy+Fusion"
-            },
-            {
-                "id": "r3",
-                "name": "Green Eats",
-                "cuisine": "Vegan",
-                "rating": 4.8,
-                "deliveryTime": "20-35 min",
-                "image": "https://via.placeholder.com/300x200?text=Green+Eats"
-            },
-            {
-                "id": "r4",
-                "name": "BBQ Haven",
-                "cuisine": "BBQ",
-                "rating": 4.6,
-                "deliveryTime": "35-50 min",
-                "image": "https://via.placeholder.com/300x200?text=BBQ+Haven"
-            }
-        ]
-
+        # Return an empty list on error
+        return []
 
 # Execute this program if it is run as a main script (not by 'import')
 if __name__ == "__main__":
