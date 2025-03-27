@@ -84,7 +84,7 @@
                 <div v-if="item.stock_quantity > 0">
                   <button 
                     class="btn btn-primary add-to-cart" 
-                    v-if="!isHomePage" 
+                    v-if="isLoggedIn" 
                     @click="addToCart(item)"
                   >
                     <i class="fas fa-plus"></i> Add
@@ -133,6 +133,7 @@ export default {
       isLoading: true,
       isLoadingMenuItems: true,
       error: null,
+      isLoggedIn: false,
       menuItemsError: null,
       cart: {
         items: [],
@@ -147,6 +148,11 @@ export default {
     }
   },
   methods: {
+    checkLoginStatus() {
+      // Check if user is logged in based on localStorage
+      this.isLoggedIn = localStorage.getItem('isAuthenticated') === 'true';
+    },
+    
     async fetchData() {
       this.isLoading = true;
       this.error = null;
@@ -273,7 +279,18 @@ export default {
     }
   },
   mounted() {
+    this.checkLoginStatus();
     this.fetchData();
+    
+    // Listen for login/logout events
+    window.addEventListener('user-logged-in', this.checkLoginStatus);
+    window.addEventListener('user-logged-out', this.checkLoginStatus);
+  },
+  beforeDestroy() {  // Vue 2
+  // beforeUnmount() {  // uncomment this and comment the above line if using Vue 3
+    // Clean up event listeners
+    window.removeEventListener('user-logged-in', this.checkLoginStatus);
+    window.removeEventListener('user-logged-out', this.checkLoginStatus);
   },
   watch: {
     // Re-fetch data if restaurant ID changes

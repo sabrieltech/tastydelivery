@@ -49,7 +49,7 @@
             <div class="restaurant-info">
               <h3>{{ restaurant.name }}</h3>
               <p class="cuisine">{{ restaurant.cuisine_type || restaurant.cuisine }}</p>
-              <p class="orders-count"><i class="fas fa-shopping-bag"></i> {{ restaurant.transactionCount || 0 }} orders</p>
+              <p class="orders-count"><i class="fas fa-shopping-bag"></i> {{ restaurant.transactionCount || 0 }} {{ restaurant.transactionCount === 1 ? 'dish' : 'dishes' }}</p>
             </div>
           </div>
         </div>
@@ -130,18 +130,25 @@
 
       <!-- Notifications -->
       <section class="notifications" v-if="notifications.length > 0">
-        <h2>Notifications</h2>
+        <h2>Notifications ({{ notifications.length }})</h2>
         <div class="notification-list">
-          <div v-for="notification in notifications" :key="notification.notification_id || notification.id" class="notification-card">
+          <div v-for="notification in displayedNotifications" 
+               :key="notification.notification_id || notification.id" 
+               class="notification-card">
             <div class="notification-icon" :class="notification.type || getNotificationType(notification.message_type)">
               <i :class="getNotificationIcon(notification.type || getNotificationType(notification.message_type))"></i>
             </div>
             <div class="notification-content">
               <h3>{{ notification.title || getNotificationTitle(notification.message_type) }}</h3>
-              <p>{{ notification.message || getNotificationMessage(notification) }}</p>
-              <span class="notification-time">{{ notification.time || formatNotificationTime(notification.created_at) }}</span>
+              <p>{{ getNotificationMessage(notification) }}</p>
+              <span class="notification-time">{{ notification.time }}</span>
             </div>
           </div>
+        </div>
+        <div v-if="hasMoreNotifications" class="load-more-container">
+          <button @click="loadMoreNotifications" class="btn btn-secondary load-more-btn">
+            <i class="fas fa-chevron-down"></i> Load More Notifications
+          </button>
         </div>
       </section>
     </div>
@@ -170,7 +177,10 @@ export default {
       popularError: null,
       displayedOrders: [],
       ordersPerPage: 6,
-      currentPage: 1
+      currentPage: 1,
+      transactionDetails: {}, // Add this property to store transaction details
+      notificationsPerPage: 3,
+      displayedNotificationsCount: 3,
     }
   },
   computed: {
@@ -188,6 +198,19 @@ export default {
       }
       // For Gold tier, already at max
       return 100;
+    },
+    sortedNotifications() {
+      return [...this.notifications].sort((a, b) => {
+        const dateA = new Date(a.created_at || a.time);
+        const dateB = new Date(b.created_at || b.time);
+        return dateB - dateA;
+      });
+    },
+    displayedNotifications() {
+      return this.sortedNotifications.slice(0, this.displayedNotificationsCount);
+    },
+    hasMoreNotifications() {
+      return this.displayedNotificationsCount < this.notifications.length;
     }
   },
   methods: {
@@ -252,12 +275,23 @@ export default {
     },
     getNotificationMessage(notification) {
       switch(notification.message_type) {
-        case 'Payment_Success':
-          return `Your payment for order was successful`;
+        case 'Payment_Success': {
+          // Use transaction_id instead of notification_id
+          const transaction = this.transactionDetails[notification.transaction_id];
+          console.log('Transaction found:', transaction, 'for ID:', notification.transaction_id);
+          
+          if (transaction && transaction.total_price_after_discount !== undefined) {
+            return `Your payment of $${transaction.total_price_after_discount.toFixed(2)} was successful`;
+          }
+          if (transaction && transaction.total_price !== undefined) {
+            return `Your payment of $${transaction.total_price.toFixed(2)} was successful`;
+          }
+          return `Your payment was successful`;
+        }
         case 'Refund_Processed':
           return 'Your refund has been processed successfully';
         case 'Loyalty_Updated':
-          return `You now have ${notification.loyalty_points || 0} points`;
+          return `You now have ${notification.loyalty_points || 0} points and are a ${notification.loyalty_status || 'Bronze'} member`;
         default:
           return 'You have a new notification';
       }
@@ -389,6 +423,8 @@ export default {
           // Update notifications
           if (result.data.notifications) {
             this.notifications = result.data.notifications;
+            // Call fetchTransactionDetails after notifications are set
+            await this.fetchTransactionDetails();
           }
         } else {
           this.restaurantsError = 'Could not load personalized data';
@@ -460,14 +496,15 @@ export default {
             userTransactionIds.includes(item.transaction_id)
           );
           
-          // Count orders per restaurant
+          // Count orders per restaurant, accounting for quantity
           const restaurantOrderCounts = {};
           userTransactionItems.forEach(item => {
             const restaurantId = item.restaurant_id;
             if (!restaurantOrderCounts[restaurantId]) {
               restaurantOrderCounts[restaurantId] = 0;
             }
-            restaurantOrderCounts[restaurantId]++;
+            // Add quantity to the count instead of incrementing by 1
+            restaurantOrderCounts[restaurantId] += item.quantity || 1;
           });
           
           // Add order counts to restaurants and filter to only include ones ordered from
@@ -504,11 +541,48 @@ export default {
         this.isLoadingPopular = false;
       }
     },
+
+    async fetchTransactionDetails() {
+      if (!this.notifications || this.notifications.length === 0) {
+        return;
+      }
+      
+      const paymentNotifications = this.notifications.filter(
+        notification => notification.message_type === 'Payment_Success' && notification.transaction_id
+      );
+      
+      if (paymentNotifications.length === 0) {
+        return;
+      }
+      
+      const transactionDetails = {};
+      
+      for (const notification of paymentNotifications) {
+        try {
+          const response = await fetch(`http://localhost:5009/transaction/${notification.transaction_id}`);
+          
+          if (response.ok) {
+            const result = await response.json();
+            if (result.code === 200 && result.data) {
+              // Store using transaction_id instead of notification_id
+              transactionDetails[notification.transaction_id] = result.data;
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching transaction details for ${notification.transaction_id}:`, error);
+        }
+      }
+      
+      this.transactionDetails = transactionDetails;
+    },
+    loadMoreNotifications() {
+      this.displayedNotificationsCount = this.notifications.length;
+    }
   },
-  mounted() {
+  async mounted() {
     this.loadUserData();
-    this.fetchPersonalizedHomepage();
-    this.fetchPopularRestaurants();
+    await this.fetchPersonalizedHomepage();
+    await this.fetchPopularRestaurants();
   }
 }
 </script>
@@ -602,7 +676,7 @@ export default {
   position: absolute;
   top: 10px;
   left: 10px;
-  background-color: rgba(255, 90, 95, 0.9);
+  background-color: rgba(255, 90, 95, 0.8);
   color: white;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -771,7 +845,7 @@ export default {
   position: absolute;
   bottom: 10px;
   right: 10px;
-  background-color: rgba(255,215,0,0.9);
+  background-color: rgb(255,215,0,0.8);
   color: white;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;

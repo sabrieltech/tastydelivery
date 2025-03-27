@@ -82,6 +82,9 @@ export default {
 
       // Close any open menus
       this.userMenuOpen = false;
+      
+      // Dispatch a custom event for other components to respond to logout
+      window.dispatchEvent(new Event('user-logged-out'));
 
       // Redirect to home page
       if (this.$route.path !== '/') {
@@ -159,10 +162,6 @@ export default {
 
 .navbar-menu a {
   font-weight: 500;
-}
-
-.navbar-menu a:hover {
-  color: var(--primary-color);
 }
 
 .navbar-toggle {
