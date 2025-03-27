@@ -94,7 +94,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"pasta_palace\",\n    \"password_hash\": \"hashed_password_6\",\n    \"name\": \"Pasta Palace\",\n    \"latitude\": 39.952583,\n    \"longitude\": -75.165222,\n    \"contact_number\": \"+6677889900\",\n    \"cuisine_type\": \"Italian\",\n    \"rating\": 4.3\n}",
+					"raw": "{\n    \"username\": \"pasta_palace\",\n    \"password_hash\": \"hashed_password_6\",\n    \"name\": \"Pasta Palace\",\n    \"latitude\": 39.952583,\n    \"longitude\": -75.165222,\n    \"contact_number\": \"+6677889900\",\n    \"cuisine_type\": \"Italian\",\n    \"rating\": 4.3,\n    \"image_url\": \"https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//italian.jpg\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -173,6 +173,36 @@
 					]
 				},
 				"description": "Updates a restaurant's rating"
+			}
+		},
+		{
+			"name": "Update Restaurant Image",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"image_url\": \"https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//updated-italian.jpg\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5007/restaurant/image/REST001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5007",
+					"path": [
+						"restaurant",
+						"image",
+						"REST001"
+					]
+				},
+				"description": "Updates a restaurant's image URL"
 			}
 		},
 		{

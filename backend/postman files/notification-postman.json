@@ -95,7 +95,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"customer_id\": \"CUST001\",\n    \"message_type\": \"Payment_Success\",\n    \"transaction_id\": \"TRANS016\",\n    \"loyalty_points\": 15,\n    \"loyalty_status\": \"Silver\"\n}",
+					"raw": "{\n    \"customer_id\": \"CUST001\",\n    \"message_type\": \"Payment_Success\",\n    \"transaction_id\": \"TRANS026\",\n    \"loyalty_points\": 15,\n    \"loyalty_status\": \"Silver\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -103,7 +103,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5011/notification/NOTIF016",
+					"raw": "http://localhost:5011/notification/NOTIF026",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -111,7 +111,7 @@
 					"port": "5011",
 					"path": [
 						"notification",
-						"NOTIF016"
+						"NOTIF026"
 					]
 				},
 				"description": "Creates a new notification"
@@ -166,7 +166,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5011/notification/NOTIF016",
+					"raw": "http://localhost:5011/notification/NOTIF026",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -174,7 +174,7 @@
 					"port": "5011",
 					"path": [
 						"notification",
-						"NOTIF016"
+						"NOTIF026"
 					]
 				},
 				"description": "Deletes a notification"

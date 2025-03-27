@@ -1,100 +1,100 @@
 {
 	"info": {
-		"_postman_id": "d1e2f3g4-h5i6-j7k8-l9m0-n1o2p3q4r5s6",
-		"name": "Food Delivery - Transaction Service",
-		"description": "API collection for testing the Transaction microservice",
+		"_postman_id": "e1f2g3h4-i5j6-k7l8-m9n0-o1p2q3r4s5t6",
+		"name": "Food Delivery - Transaction Item Service",
+		"description": "API collection for testing the Transaction Item microservice",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Get All Transactions",
+			"name": "Get All Transaction Items",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5009/transaction",
+					"raw": "http://localhost:5010/transaction_item",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "5009",
+					"port": "5010",
 					"path": [
-						"transaction"
+						"transaction_item"
 					]
 				},
-				"description": "Retrieves all transactions from the database"
+				"description": "Retrieves all transaction items from the database"
 			}
 		},
 		{
-			"name": "Get Transaction by ID",
+			"name": "Get Transaction Item by ID",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5009/transaction/TRANS001",
+					"raw": "http://localhost:5010/transaction_item/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "5009",
+					"port": "5010",
 					"path": [
+						"transaction_item",
+						"1"
+					]
+				},
+				"description": "Retrieves a specific transaction item by ID"
+			}
+		},
+		{
+			"name": "Get Transaction Items by Transaction ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5010/transaction_item/transaction/TRANS001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5010",
+					"path": [
+						"transaction_item",
 						"transaction",
 						"TRANS001"
 					]
 				},
-				"description": "Retrieves a specific transaction by ID"
+				"description": "Retrieves all items for a specific transaction"
 			}
 		},
 		{
-			"name": "Get Transactions by Customer ID",
+			"name": "Get Transaction Items by Restaurant ID",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5009/transaction/customer/CUST001",
+					"raw": "http://localhost:5010/transaction_item/restaurant/REST001",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "5009",
+					"port": "5010",
 					"path": [
-						"transaction",
-						"customer",
-						"CUST001"
+						"transaction_item",
+						"restaurant",
+						"REST001"
 					]
 				},
-				"description": "Retrieves all transactions for a specific customer"
+				"description": "Retrieves all transaction items from a specific restaurant"
 			}
 		},
 		{
-			"name": "Get Transactions by Status",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:5009/transaction/status/Pending",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5009",
-					"path": [
-						"transaction",
-						"status",
-						"Pending"
-					]
-				},
-				"description": "Retrieves all transactions with a specific status"
-			}
-		},
-		{
-			"name": "Create New Transaction",
+			"name": "Create New Transaction Item",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"transaction_id\": \"TRANS016\",\n    \"customer_id\": \"CUST001\",\n    \"food_cost\": 22.50,\n    \"delivery_cost\": 3.99,\n    \"loyalty_discount_percentage\": 5.00,\n    \"total_price_after_discount\": 25.07,\n    \"loyalty_points_added\": 10,\n    \"current_loyalty_points\": 184,\n    \"current_loyalty_status\": \"Silver\",\n    \"status\": \"Pending\"\n}",
+					"raw": "{\n    \"transaction_id\": \"TRANS001\",\n    \"restaurant_id\": \"REST001\",\n    \"item_id\": 1,\n    \"quantity\": 2,\n    \"price_per_item\": 8.99,\n    \"total_price\": 17.98\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -102,27 +102,56 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5009/transaction",
+					"raw": "http://localhost:5010/transaction_item",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "5009",
+					"port": "5010",
 					"path": [
-						"transaction"
+						"transaction_item"
 					]
 				},
-				"description": "Creates a new transaction"
+				"description": "Creates a new transaction item"
 			}
 		},
 		{
-			"name": "Update Transaction",
+			"name": "Create Batch Transaction Items",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"items\": [\n        {\n            \"transaction_id\": \"TRANS026\",\n            \"restaurant_id\": \"REST001\",\n            \"item_id\": 1,\n            \"quantity\": 1,\n            \"price_per_item\": 8.99,\n            \"total_price\": 8.99\n        },\n        {\n            \"transaction_id\": \"TRANS026\",\n            \"restaurant_id\": \"REST001\",\n            \"item_id\": 2,\n            \"quantity\": 2,\n            \"price_per_item\": 3.49,\n            \"total_price\": 6.98\n        },\n        {\n            \"transaction_id\": \"TRANS026\",\n            \"restaurant_id\": \"REST001\",\n            \"item_id\": 3,\n            \"quantity\": 3,\n            \"price_per_item\": 1.99,\n            \"total_price\": 5.97\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5010/transaction_item/batch",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5010",
+					"path": [
+						"transaction_item",
+						"batch"
+					]
+				},
+				"description": "Creates multiple transaction items in a single request"
+			}
+		},
+		{
+			"name": "Update Transaction Item",
 			"request": {
 				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"food_cost\": 24.50,\n    \"total_price_after_discount\": 26.97\n}",
+					"raw": "{\n    \"quantity\": 3,\n    \"total_price\": 26.97\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -130,78 +159,38 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5009/transaction/TRANS001",
+					"raw": "http://localhost:5010/transaction_item/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "5009",
+					"port": "5010",
 					"path": [
-						"transaction",
-						"TRANS001"
+						"transaction_item",
+						"1"
 					]
 				},
-				"description": "Updates an existing transaction"
+				"description": "Updates an existing transaction item"
 			}
 		},
 		{
-			"name": "Update Transaction Status",
+			"name": "Delete Transaction Item",
 			"request": {
-				"method": "PUT",
+				"method": "DELETE",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"status\": \"Paid\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
 				"url": {
-					"raw": "http://localhost:5009/transaction/TRANS003/status",
+					"raw": "http://localhost:5010/transaction_item/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "5009",
+					"port": "5010",
 					"path": [
-						"transaction",
-						"TRANS003",
-						"status"
+						"transaction_item",
+						"1"
 					]
 				},
-				"description": "Updates the status of a transaction"
-			}
-		},
-		{
-			"name": "Assign Rider to Transaction",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"rider_id\": \"RIDER002\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:5009/transaction/TRANS003/assign_rider",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5009",
-					"path": [
-						"transaction",
-						"TRANS003",
-						"assign_rider"
-					]
-				},
-				"description": "Assigns a rider to a transaction"
+				"description": "Deletes a transaction item from the database"
 			}
 		}
 	]

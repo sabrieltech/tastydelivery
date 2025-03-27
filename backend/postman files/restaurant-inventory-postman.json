@@ -73,7 +73,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"restaurant_id\": \"REST001\",\n    \"item_name\": \"Chocolate Cake\",\n    \"price\": 6.99,\n    \"stock_quantity\": 25\n}",
+					"raw": "{\n    \"restaurant_id\": \"REST001\",\n    \"item_name\": \"Chocolate Cake\",\n    \"price\": 6.99,\n    \"stock_quantity\": 25,\n    \"image_url\": \"https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -101,7 +101,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"item_name\": \"Deluxe Cheeseburger\",\n    \"price\": 9.99\n}",
+					"raw": "{\n    \"item_name\": \"Deluxe Cheeseburger\",\n    \"price\": 9.99,\n    \"image_url\": \"https://dkfesmofervpcbwawjna.supabase.co/storage/v1/object/public/esdrestaurantimages//loading.jpg\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -159,7 +159,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5008/restaurant_inventory/16",
+					"raw": "http://localhost:5008/restaurant_inventory/71",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -167,7 +167,7 @@
 					"port": "5008",
 					"path": [
 						"restaurant_inventory",
-						"16"
+						"71"
 					]
 				},
 				"description": "Deletes an inventory item from the database"
