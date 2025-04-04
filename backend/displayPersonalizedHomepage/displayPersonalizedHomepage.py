@@ -296,6 +296,47 @@ def get_unread_notifications(customer_id):
             if notification["message_type"] == "Payment_Success":
                 notification["type"] = "payment"
                 notification["title"] = "Payment Successful"
+                # Remove the message field
+                if "message" in notification:
+                    del notification["message"]
+            elif notification["message_type"] == "Refund_Processed":
+                notification["type"] = "refund"
+                notification["title"] = "Refund Processed"
+                # Remove the message field
+                if "message" in notification:
+                    del notification["message"]
+            elif notification["message_type"] == "Loyalty_Updated":
+                notification["type"] = "loyalty"
+                notification["title"] = "Loyalty Status Updated"
+                # Remove the message field
+                if "message" in notification:
+                    del notification["message"]
+            
+            # Format time
+            created_at = datetime.strptime(notification["created_at"], '%Y-%m-%d %H:%M:%S')
+            now = datetime.now()
+            delta = now - created_at
+            
+            if delta.days > 0:
+                notification["time"] = f"{delta.days} days ago"
+            elif delta.seconds // 3600 > 0:
+                notification["time"] = f"{delta.seconds // 3600} hours ago"
+            else:
+                notification["time"] = f"{delta.seconds // 60} minutes ago"
+    
+    return notifications_result
+    """Get unread notifications for a customer"""
+    print('\n-----Invoking notification microservice-----')
+    notifications_result = invoke_http(f"{notification_URL}/unread/customer/{customer_id}", method='GET')
+    print('notifications_result:', notifications_result)
+    
+    # Process notifications if found
+    if notifications_result["code"] == 200:
+        for notification in notifications_result["data"]["notifications"]:
+            # Map notification types to frontend types
+            if notification["message_type"] == "Payment_Success":
+                notification["type"] = "payment"
+                notification["title"] = "Payment Successful"
                 notification["message"] = f"Your payment of ${notification.get('total_amount', '0.00')} was successful"
             elif notification["message_type"] == "Refund_Processed":
                 notification["type"] = "refund"

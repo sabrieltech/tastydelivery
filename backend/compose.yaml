@@ -123,6 +123,23 @@ services:
     networks:
       - fooddelivery-net
 
+  ###################################
+  # Rider: The Rider microservice
+  ###################################
+  rider:
+    build:
+      context: ./rider/
+      dockerfile: rider.Dockerfile
+    image: fooddelivery/rider:latest
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5015:5015"
+    networks:
+      - fooddelivery-net
+
   
   ###################################
   # Personalized Homepage: The composite microservice
@@ -154,3 +171,25 @@ services:
       - transaction_item
       - notification
       - voucher
+
+
+###################################
+  # Dynamic Pricing: The Dynamic Pricing microservice
+  ###################################
+  calculateDynamicPricing:
+    build:
+      context: ./calculateDynamicPricing/
+      dockerfile: calculateDynamicPricing.Dockerfile
+    image: fooddelivery/dynamic_pricing:latest
+    restart: always
+    environment:
+      restaurant_URL: "http://restaurant:5007/restaurant"
+      rider_URL: "http://rider:5015/rider"
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5016:5016"
+    networks:
+      - fooddelivery-net
+    depends_on:
+      - restaurant
+      - rider

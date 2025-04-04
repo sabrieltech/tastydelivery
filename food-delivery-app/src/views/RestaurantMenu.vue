@@ -78,8 +78,8 @@
             </div>
             <div class="item-info">
               <h3>{{ item.item_name }}</h3>
-              <p class="item-description">{{ item.description }}</p>
-               <div class="item-footer">
+              <p class="item-description">{{ item.description || 'Delicious menu item' }}</p>
+              <div class="item-footer">
                 <span class="item-price">${{ item.price.toFixed(2) }}</span>
                 <div v-if="item.stock_quantity > 0">
                   <button 
@@ -111,7 +111,7 @@
           <span class="cart-count">{{ cart.totalItems }} items</span>
           <span class="cart-total">${{ cart.totalPrice.toFixed(2) }}</span>
         </div>
-        <button class="btn btn-primary checkout-btn" @click="goToCheckout">
+        <button class="btn btn-primary checkout-btn" @click="goToCartPage">
           Proceed to Checkout
         </button>
       </div>
@@ -195,10 +195,9 @@ export default {
         }
         
         const menuResult = await menuResponse.json();
-        console.log(menuResult);
+        
         if (menuResult.code === 200) {
-          this.menuItems = Array.isArray(this.menuItems) ? this.menuItems : [];
-          this.menuItems = menuResult.data.inventory_items;
+          this.menuItems = menuResult.data.inventory_items || [];
           this.filteredMenuItems = [...this.menuItems];
           
           // Extract unique categories
@@ -244,50 +243,80 @@ export default {
     },
     
     addToCart(item) {
-      // Check if item is already in cart
-      const existingItem = this.cart.items.find(cartItem => cartItem.item_id === item.item_id);
-      
-      if (existingItem) {
-        // Increment quantity if already in cart
-        existingItem.quantity += 1;
-        existingItem.totalPrice = existingItem.quantity * existingItem.price;
-      } else {
-        // Add new item to cart
-        this.cart.items.push({
-          ...item,
-          quantity: 1,
-          totalPrice: item.price
-        });
+      try {
+        // First, retrieve the current cart from localStorage
+        const cartData = localStorage.getItem('cart');
+        let cartItems = [];
+        
+        if (cartData) {
+          cartItems = JSON.parse(cartData);
+        }
+        
+        // Check if item is already in cart
+        const existingItemIndex = cartItems.findIndex(cartItem => cartItem.item_id === item.item_id);
+        
+        if (existingItemIndex >= 0) {
+          // Increment quantity if already in cart
+          cartItems[existingItemIndex].quantity += 1;
+          cartItems[existingItemIndex].totalPrice = cartItems[existingItemIndex].quantity * cartItems[existingItemIndex].price;
+        } else {
+          // Add new item to cart with restaurant info
+          cartItems.push({
+            ...item,
+            restaurant_name: this.restaurant.name,
+            quantity: 1,
+            totalPrice: item.price
+          });
+        }
+        
+        // Update cart in localStorage
+        localStorage.setItem('cart', JSON.stringify(cartItems));
+        
+        // Update the cart display
+        this.loadCartFromStorage();
+        
+      } catch (error) {
+        console.error('Error adding item to cart:', error);
       }
-      
-      // Update cart totals
-      this.updateCartTotals();
-      
-      // Show success notification (in a real app)
-      // this.$toast.success(`Added ${item.item_name} to cart`);
     },
     
-    updateCartTotals() {
-      this.cart.totalItems = this.cart.items.reduce((total, item) => total + item.quantity, 0);
-      this.cart.totalPrice = this.cart.items.reduce((total, item) => total + item.totalPrice, 0);
+    loadCartFromStorage() {
+      // Load cart from localStorage
+      const cartData = localStorage.getItem('cart');
+      if (cartData) {
+        try {
+          const cartItems = JSON.parse(cartData);
+          this.cart.items = cartItems;
+          this.cart.totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+          this.cart.totalPrice = cartItems.reduce((total, item) => total + item.totalPrice, 0);
+        } catch (error) {
+          console.error('Error parsing cart data:', error);
+          this.cart.items = [];
+          this.cart.totalItems = 0;
+          this.cart.totalPrice = 0;
+        }
+      } else {
+        this.cart.items = [];
+        this.cart.totalItems = 0;
+        this.cart.totalPrice = 0;
+      }
     },
     
-    goToCheckout() {
-      // In a real app, save cart to store/localStorage and redirect
-      alert('Proceeding to checkout with ' + this.cart.totalItems + ' items totaling $' + this.cart.totalPrice.toFixed(2));
-      // this.$router.push('/checkout');
+    goToCartPage() {
+      // Navigate to the cart page
+      this.$router.push('/cart');
     }
   },
   mounted() {
     this.checkLoginStatus();
     this.fetchData();
+    this.loadCartFromStorage();
     
     // Listen for login/logout events
     window.addEventListener('user-logged-in', this.checkLoginStatus);
     window.addEventListener('user-logged-out', this.checkLoginStatus);
   },
-  beforeDestroy() {  // Vue 2
-  // beforeUnmount() {  // uncomment this and comment the above line if using Vue 3
+  beforeDestroy() {
     // Clean up event listeners
     window.removeEventListener('user-logged-in', this.checkLoginStatus);
     window.removeEventListener('user-logged-out', this.checkLoginStatus);

@@ -8,6 +8,7 @@ import RestaurantDetailPage from '@/views/RestaurantDetailPage.vue'
 import SignupPage from '@/views/SignupPage.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import AppHomePage from '@/views/AppHomePage.vue'
+import CartPage from '@/views/CartPage.vue'
 
 Vue.use(VueRouter)
 
@@ -67,6 +68,18 @@ const routes = [
     path: '/restaurant/:id/menu',
     name: 'RestaurantMenu',
     component: () => import('../views/RestaurantMenu.vue')
+  },
+  {
+    path: '/cart',
+    name: 'Cart',
+    component: CartPage,
+    beforeEnter: requireAuth
+  },
+  {
+    path: '/checkout',
+    name: 'Checkout',
+    component: () => import('../views/Checkout.vue'),
+    beforeEnter: requireAuth
   }
 ]
 

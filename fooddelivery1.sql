@@ -311,9 +311,9 @@ CREATE TABLE IF NOT EXISTS `rider` (
 --
 
 INSERT INTO `rider` (`rider_id`, `name`, `phone_number`, `vehicle_type`, `availability_status`, `latitude`, `longitude`, `assigned_transaction_id`, `created_at`) VALUES
-('RIDER001', 'John Doe', '+1111111111', 'Motorcycle', 'On Delivery', 40.754932, -73.984016, 'TRANS001', NOW()),
-('RIDER002', 'Jane Smith', '+2222222222', 'Bicycle', 'Available', 34.044727, -118.249283, NULL, NOW()),
-('RIDER003', 'Mike Johnson', '+3333333333', 'Car', 'On Delivery', 41.878113, -87.629799, 'TRANS009', NOW());
+('RIDER001', 'John Delivery', '+1111111111', 'Motorcycle', 'On Delivery', 40.754932, -73.984016, 'TRANS001', NOW()),
+('RIDER002', 'Sarah Swift', '+2222222222', 'Bicycle', 'Available', 34.044727, -118.249283, NULL, NOW()),
+('RIDER003', 'Mike Runner', '+3333333333', 'Car', 'On Delivery', 41.878113, -87.629799, 'TRANS009', NOW());
 
 --
 -- Table structure for table `notification`
