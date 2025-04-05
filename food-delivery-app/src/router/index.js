@@ -9,6 +9,8 @@ import SignupPage from '@/views/SignupPage.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import AppHomePage from '@/views/AppHomePage.vue'
 import CartPage from '@/views/CartPage.vue'
+import OrderSuccess from '@/views/OrderSuccess.vue'
+
 
 Vue.use(VueRouter)
 
@@ -80,7 +82,14 @@ const routes = [
     name: 'Checkout',
     component: () => import('../views/Checkout.vue'),
     beforeEnter: requireAuth
+  },
+  {
+    path: '/app/order-success',
+    name: 'OrderSuccess',
+    component: OrderSuccess,
+    beforeEnter: requireAuth
   }
+  
 ]
 
 const router = new VueRouter({

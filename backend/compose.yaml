@@ -105,6 +105,8 @@ services:
       - "5011:5011"
     networks:
       - fooddelivery-net
+    volumes:
+      - ./notification/templates:/templates
 
   ###################################
   # Voucher: The Voucher microservice
@@ -173,7 +175,7 @@ services:
       - voucher
 
 
-###################################
+  ###################################
   # Dynamic Pricing: The Dynamic Pricing microservice
   ###################################
   calculateDynamicPricing:
@@ -193,3 +195,50 @@ services:
     depends_on:
       - restaurant
       - rider
+
+  ###################################
+  # Stripe Service: Payment service using Stripe
+  ###################################
+  stripeService:
+    build:
+      context: ./stripe_service/
+      dockerfile: stripe_service.Dockerfile
+    image: fooddelivery/stripe_service:latest
+    restart: always
+    environment:
+      STRIPE_API_KEY: "sk_test_51RABcdQOf6nNEYS6EtcT2rpS2rhh2C8OS27gNG9JQDFF6NZk90wiveaJabUHnF2OoCq8qyF54xCLBprVCByTMyUQ00jvBngMEk"
+      STRIPE_PUBLISHABLE_KEY: "pk_test_51RABcdQOf6nNEYS6gkG9lNJJbOojM2bXxkZfgwDNfutZH6AAkiStVVqO7Z49kvRzSs2eAvggP6l5IveRoQBjZybR00I0oI8Kim"
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5021:5021"
+    networks:
+      - fooddelivery-net
+
+  ###################################
+  # Process Customer Payment: The customer payment orchestration service
+  ###################################
+  processCustomerPayment:
+    build:
+      context: ./processCustomerPayment/
+      dockerfile: processCustomerPayment.Dockerfile
+    image: fooddelivery/process_payment:latest
+    restart: always
+    environment:
+      dynamic_pricing_URL: "http://calculateDynamicPricing:5016/calculate_delivery_fee"
+      transaction_URL: "http://transaction:5009/transaction"
+      notification_URL: "http://notification:5011/notification"
+      customer_URL: "http://customer:5006/customer"
+      voucher_URL: "http://voucher:5012/voucher"
+      stripe_service_URL: "http://stripeService:5021/payment/stripe"
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5020:5020"
+    networks:
+      - fooddelivery-net
+    depends_on:
+      - calculateDynamicPricing
+      - transaction
+      - notification
+      - customer
+      - voucher
+      - stripeService

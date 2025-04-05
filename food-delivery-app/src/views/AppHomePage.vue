@@ -277,9 +277,7 @@ export default {
       switch(notification.message_type) {
         case 'Payment_Success': {
           // Use transaction_id instead of notification_id
-          const transaction = this.transactionDetails[notification.transaction_id];
-          console.log('Transaction found:', transaction, 'for ID:', notification.transaction_id);
-          
+          const transaction = this.transactionDetails[notification.transaction_id];          
           if (transaction && transaction.total_price_after_discount !== undefined) {
             return `Your payment of $${transaction.total_price_after_discount.toFixed(2)} was successful`;
           }

@@ -96,8 +96,42 @@ def calculate_travel_time(restaurant_coords, rider_coords):
         duration_text = result['duration']
         minutes = 0
         
-        # Parse duration text (assuming format like "X mins" or "X hours Y mins")
-        if "hours" in duration_text and "mins" in duration_text:
+        # Parse duration text (assuming format like "X days Y hours Z mins", "X hours Y mins", or "1 min")
+        if "days" in duration_text:
+            # Format: "X days Y hours Z mins"
+            days_part = duration_text.split("days")[0].strip()
+            remaining = duration_text.split("days")[1].strip()
+            hours_part = 0
+            mins_part = 0
+            if "hours" in remaining and "mins" in remaining:
+                hours_part = remaining.split("hours")[0].strip()
+                mins_part = remaining.split("hours")[1].split("mins")[0].strip()
+            elif "hour" in remaining and "mins" in remaining:
+                hours_part = remaining.split("hour")[0].strip()
+                mins_part = remaining.split("hour")[1].split("mins")[0].strip()
+            elif "hour" in remaining:
+                hours_part = remaining.split("hour")[0].strip()
+            elif "min" in remaining:
+                mins_part = remaining.split("min")[0].strip()
+            minutes = int(days_part) * 24 * 60 + int(hours_part) * 60 + int(mins_part)
+        elif "day" in duration_text:
+            # Format: "1 day Y hours Z mins"
+            days_part = duration_text.split("day")[0].strip()
+            remaining = duration_text.split("day")[1].strip()
+            hours_part = 0
+            mins_part = 0
+            if "hours" in remaining and "mins" in remaining:
+                hours_part = remaining.split("hours")[0].strip()
+                mins_part = remaining.split("hours")[1].split("mins")[0].strip()
+            elif "hour" in remaining and "mins" in remaining:
+                hours_part = remaining.split("hour")[0].strip()
+                mins_part = remaining.split("hour")[1].split("mins")[0].strip()
+            elif "hour" in remaining:
+                hours_part = remaining.split("hour")[0].strip()
+            elif "min" in remaining:
+                mins_part = remaining.split("min")[0].strip()
+            minutes = int(days_part) * 24 * 60 + int(hours_part) * 60 + int(mins_part)
+        elif "hours" in duration_text and "mins" in duration_text:
             # Format: "X hours Y mins"
             hours_part = duration_text.split("hours")[0].strip()
             mins_part = duration_text.split("hours")[1].split("mins")[0].strip()
@@ -111,10 +145,13 @@ def calculate_travel_time(restaurant_coords, rider_coords):
             # Format: "1 hour" or "X hours"
             hours_part = duration_text.split("hour")[0].strip()
             minutes = int(hours_part) * 60
-        else:
-            # Format: "X mins"
-            mins_part = duration_text.split("mins")[0].strip()
+        elif "min" in duration_text:  # Handle both "1 min" and "X mins"
+            mins_part = duration_text.split("min")[0].strip()
             minutes = int(mins_part)
+        else:
+            # Fallback for unrecognized formats
+            print(f"Warning: Unrecognized duration format: {duration_text}")
+            minutes = 0  # Default to 0 minutes if the format is unrecognized
         
         return {
             "duration_text": duration_text,
@@ -151,11 +188,11 @@ def calculate_price(travel_time_data):
     distance_text = travel_time_data["distance"]
     distance_km = 0
     
-    # Parse distance text (e.g., "5.2 km")
+    # Parse distance text (e.g., "5.2 km" or "4,493 m")
     if "km" in distance_text:
-        distance_km = float(distance_text.split("km")[0].strip())
+        distance_km = float(distance_text.split("km")[0].strip().replace(",", ""))
     elif "m" in distance_text:  # For very short distances in meters
-        distance_m = float(distance_text.split("m")[0].strip())
+        distance_m = float(distance_text.split("m")[0].strip().replace(",", ""))
         distance_km = distance_m / 1000
     
     # Apply distance surcharge
@@ -180,6 +217,39 @@ def calculate_price(travel_time_data):
         "total_price": total_price
     }
 
+
+def getStaticMapImageUrl(restaurant_coords, rider_coords):
+    """
+    Generate a static map image URL using the Google Static Maps API.
+    """
+    try:
+        # Define the base URL for the Google Static Maps API
+        base_url = "https://maps.googleapis.com/maps/api/staticmap?"
+        
+        # Define the map parameters
+        size = "600x300"  # Map size
+        maptype = "roadmap"  # Map type
+        markers = []
+        
+        # Add restaurant marker
+        restaurant_marker = f"color:blue%7Clabel:R%7C{restaurant_coords[0]},{restaurant_coords[1]}"
+        markers.append(restaurant_marker)
+        
+        # Add rider marker
+        rider_marker = f"color:red%7Clabel:D%7C{rider_coords[0]},{rider_coords[1]}"
+        markers.append(rider_marker)
+        
+        # Encode the markers
+        markers_str = "&markers=".join(markers)
+        
+        # Construct the URL
+        url = f"{base_url}size={size}&maptype={maptype}&markers={markers_str}&key=AIzaSyB1cfjM0hDHbd0tP3aYDZOd6C9tlRfyu6s"
+        
+        return url
+    
+    except Exception as e:
+        print(f"Error generating static map image URL: {str(e)}")
+        return None
 
 @app.route("/calculate_delivery_fee/<string:restaurant_id>/<string:rider_id>", methods=['GET'])
 def get_dynamic_price(restaurant_id, rider_id):
@@ -255,6 +325,14 @@ def get_dynamic_price(restaurant_id, rider_id):
         # Add price info to result
         result["data"]["price_info"] = price_data
         result["data"]["delivery_fee"] = price_data["total_price"]
+        
+        # 5. Generate static map image URL
+        print('\n-----Generating static map image URL-----')
+        static_map_url = getStaticMapImageUrl(restaurant_coords, rider_coords)
+        print('static_map_url:', static_map_url)
+        
+        # Add static map image URL to result
+        result["data"]["static_map_url"] = static_map_url
 
         return jsonify(result), result["code"]
 

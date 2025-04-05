@@ -13,7 +13,7 @@ async function getDistanceMatrix(origin, destination) {
       if (data.rows[0].elements[0].status === 'OK') {
         const distance = data.rows[0].elements[0].distance.text;
         const duration = data.rows[0].elements[0].duration.text;
-        return { distance, duration };
+        return { distance, duration, origin, destination }; // Include origin and destination
       } else {
         throw new Error(`Distance Matrix API error: ${data.rows[0].elements[0].status} - ${data.error_message || 'No error message provided'}`);
       }
@@ -26,4 +26,12 @@ async function getDistanceMatrix(origin, destination) {
   }
 }
 
-module.exports = { getDistanceMatrix };
+function getStaticMapImageUrl(origin, destination) {
+  const encodedOrigin = encodeURIComponent(origin);
+  const encodedDestination = encodeURIComponent(destination);
+  const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?origins=${encodedOrigin}&destinations=${encodedDestination}&key=${apiKey}&size=600x300&maptype=roadmap&markers=color:red%7Clabel:O%7C${encodedOrigin}&markers=color:blue%7Clabel:D%7C${encodedDestination}&path=enc:{geocoded_polyline}`; // Replace {geocoded_polyline}
+
+  return mapImageUrl;
+}
+
+module.exports = { getDistanceMatrix, getStaticMapImageUrl };

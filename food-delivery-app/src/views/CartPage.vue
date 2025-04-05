@@ -542,10 +542,28 @@ export default {
   gap: 1rem;
 }
 
-.clear-btn, .continue-shopping {
+.continue-shopping {
+  background-color: var(--success-color, #28a745); /* Change box color to green */
+  color: white; /* Ensure text is readable on green background */
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.5rem 1rem; /* Optional: Add padding for better appearance */
+  border: none; /* Optional: Remove border if present */
+  border-radius: 4px; /* Optional: Add rounded corners */
+  cursor: pointer; /* Optional: Add pointer cursor for better UX */
+}
+
+.clear-btn {
+  background-color: var(--danger-color, #dc3545); /* Change box color to red */
+  color: white; /* Ensure text is readable on red background */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem; /* Optional: Add padding for better appearance */
+  border: none; /* Optional: Remove border if present */
+  border-radius: 4px; /* Optional: Add rounded corners */
+  cursor: pointer; /* Optional: Add pointer cursor for better UX */
 }
 
 /* Order summary styling */
