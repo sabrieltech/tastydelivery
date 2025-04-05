@@ -460,9 +460,11 @@ export default {
         const result = await response.json();
 
         if (result.code === 200 && result.data && result.data.checkout_url) {
-          // Store order summary in localStorage for confirmation page
+      // Store order summary in localStorage for confirmation page
           localStorage.setItem('orderSummary', JSON.stringify(result.data.order_summary));
           localStorage.setItem('orderId', result.data.order_id);
+          // Add this line to store the transaction ID
+          localStorage.setItem('transactionId', result.data.transaction_id);
           
           // Clear cart as we're redirecting to payment
           localStorage.removeItem('cart');
@@ -669,6 +671,15 @@ export default {
   border-top: 1px solid #eee;
   font-size: 1.2rem;
   font-weight: bold;
+}
+
+/* Add background and shadow to card sections */
+.order-summary, .delivery-info, .payment-section, .loyalty-section, .loyalty-status-section {
+  background-color: #ffffff; /* White background for cards */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  overflow: hidden;
+  margin-bottom: 2rem;
 }
 
 .summary-row.discount {

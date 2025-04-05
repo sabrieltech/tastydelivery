@@ -11,10 +11,13 @@ CORS(app)
 # URLs for the microservices
 dynamic_pricing_URL = os.environ.get('dynamic_pricing_URL') or "http://localhost:5016/calculate_delivery_fee"
 transaction_URL = os.environ.get('transaction_URL') or "http://localhost:5009/transaction"
+transaction_item_URL = os.environ.get('transaction_item_URL') or "http://localhost:5010/transaction_item"
 notification_URL = os.environ.get('notification_URL') or "http://localhost:5011/notification"
 customer_URL = os.environ.get('customer_URL') or "http://localhost:5006/customer"
 voucher_URL = os.environ.get('voucher_URL') or "http://localhost:5012/voucher"
-stripe_service_URL = os.environ.get('stripe_service_URL') or "http://localhost:5004/payment/stripe"
+stripe_service_URL = os.environ.get('stripe_service_URL') or "http://localhost:5021/payment/stripe"
+restaurant_inventory_URL = os.environ.get('restaurant_inventory_URL') or "http://localhost:5008/restaurant_inventory"
+
 
 # Helper function for HTTP requests to other microservices
 def invoke_http(url, method='GET', json=None, **kwargs):
@@ -132,7 +135,6 @@ def process_payment():
             else:
                 voucher_result = invoke_http(f"{voucher_URL}/code/{voucher_code}", method='GET')
             
-            
             if voucher_result["code"] == 200 and voucher_result["data"]:
                 voucher_data = voucher_result["data"]
                 
@@ -160,10 +162,84 @@ def process_payment():
         
         # Calculate loyalty points to use (if any)
         loyalty_points_used = data.get("loyalty_points_used", 0)
+
+        # Calculate loyalty points to add (1 point per dollar spent)
+        loyalty_points_added = int(total_price)
+        
+        # NEW: Create a transaction record
+        transaction_id = f"TRANS{uuid.uuid4().hex[:8].upper()}"
+        transaction_data = {
+            "transaction_id": transaction_id,
+            "customer_id": customer_id,
+            "food_cost": float(food_cost),
+            "delivery_cost": float(delivery_fee),
+            "loyalty_discount_percentage": float(loyalty_discount_percentage),
+            "total_price_after_discount": float(total_price),
+            "loyalty_points_added": loyalty_points_added,
+            "current_loyalty_points": loyalty_points + loyalty_points_added - loyalty_points_used,
+            "current_loyalty_status": loyalty_status,
+            "status": "Pending",
+            "voucher_id": voucher_id if voucher_id else None,
+            "rider_id": rider_id
+        }
+        
+        # Create the transaction
+        transaction_result = invoke_http(
+            f"{transaction_URL}", 
+            method='POST',
+            json=transaction_data
+        )
+        
+        # Check if transaction creation was successful
+        if transaction_result["code"] not in range(200, 300):
+            return jsonify({
+                "code": transaction_result["code"],
+                "message": "Failed to create transaction"
+            }), transaction_result["code"]
+        
+        print("Transaction created:", transaction_result)
+        
+        # NEW: Create transaction items
+        # Prepare items for batch creation
+        batch_items = []
+        for item in cart_items:
+            transaction_item = {
+                "transaction_id": transaction_id,
+                "restaurant_id": item["restaurant_id"],
+                "item_id": item["item_id"],
+                "quantity": item["quantity"],
+                "price_per_item": float(item["price"]),
+                "total_price": float(item["price"] * item["quantity"])
+            }
+            batch_items.append(transaction_item)
+        
+        # Call the batch endpoint to create all items at once
+        transaction_items_result = invoke_http(
+            f"{transaction_item_URL}/batch",
+            method='POST',
+            json={"items": batch_items}
+        )
+        
+        # Check if transaction items creation was successful
+        if transaction_items_result["code"] not in range(200, 300):
+            # Attempt to rollback the transaction since items failed
+            try:
+                invoke_http(f"{transaction_URL}/{transaction_id}", method='DELETE')
+            except:
+                pass  # Ignore rollback errors
+                
+            return jsonify({
+                "code": transaction_items_result["code"],
+                "message": "Failed to create transaction items"
+            }), transaction_items_result["code"]
+        
+        print("Transaction items created:", transaction_items_result)
         
         # Prepare data for stripe service
         stripe_data = {
             "order_id": order_id,
+            "transaction_id": transaction_id,  # Add transaction_id for reference
+            "customer_id": customer_id,  # Add customer_id for reference
             "restaurant_name": restaurant_name,
             "subtotal": float(food_cost),
             "delivery_fee": float(delivery_fee),
@@ -179,45 +255,34 @@ def process_payment():
         )
         
         if "url" not in stripe_result:
+            # Attempt to rollback the transaction and items
+            try:
+                invoke_http(f"{transaction_URL}/{transaction_id}", method='DELETE')
+            except:
+                pass  # Ignore rollback errors
+                
             return jsonify({
                 "code": 500,
                 "message": "Failed to create Stripe checkout session"
             }), 500
         
-        # Store payment details in session/database for later use
-        # In a real application, you'd save this information to process once payment is completed
-        payment_data = {
-            "order_id": order_id,
-            "customer_id": customer_id,
-            "restaurant_id": restaurant_id,
-            "rider_id": rider_id,
+        # Prepare the order summary for the client
+        order_summary = {
             "food_cost": float(food_cost),
             "delivery_fee": float(delivery_fee),
-            "loyalty_discount_percentage": float(loyalty_discount_percentage),
-            "loyalty_discount_amount": float(loyalty_discount_amount),
+            "loyalty_discount": float(loyalty_discount_amount),
             "voucher_discount": float(voucher_discount),
-            "total_price": float(total_price),
-            "voucher_id": voucher_id if voucher_id else None,
-            "loyalty_points_used": loyalty_points_used,
-            "cart_items": cart_items
+            "total_price": float(total_price)
         }
         
-        # When implementing a full solution, store payment_data to a database
-        # or session store to be retrieved when webhook is received
-        
-        # Return the checkout URL
+        # Return the checkout URL, order ID, transaction ID, and order summary
         return jsonify({
             "code": 200,
             "data": {
                 "checkout_url": stripe_result["url"],
                 "order_id": order_id,
-                "order_summary": {
-                    "food_cost": float(food_cost),
-                    "delivery_fee": float(delivery_fee),
-                    "loyalty_discount": float(loyalty_discount_amount),
-                    "voucher_discount": float(voucher_discount),
-                    "total_price": float(total_price)
-                }
+                "transaction_id": transaction_id,
+                "order_summary": order_summary
             }
         }), 200
             
@@ -239,79 +304,102 @@ def payment_success():
     try:
         data = request.get_json()
         
-        # In a real implementation, you'd validate the webhook signature
-        # and retrieve the order details from your database
-        
         # Extract data
         session_id = data.get("session_id")
         order_id = data.get("order_id")
+        transaction_id = data.get("transaction_id")
         customer_id = data.get("customer_id")
         
-        # Retrieve the payment details saved earlier
-        # In a real app, you'd fetch this from a database
-        # payment_data = get_payment_data_from_db(order_id)
-        
-        # For this example, we'll just mock it
-        payment_data = {
-            "customer_id": customer_id,
-            "food_cost": 50.0,
-            "delivery_fee": 5.0,
-            "loyalty_discount_percentage": 5,
-            "total_price_after_discount": 52.25,
-            "loyalty_points_added": 52,
-            "rider_id": "RIDER001",
-            "voucher_id": None
-        }
-        
-        # Get customer info for loyalty update
-        customer_result = invoke_http(f"{customer_URL}/{customer_id}", method='GET')
-        if customer_result["code"] not in range(200, 300):
+        # Validate required fields
+        if not (session_id and customer_id):
             return jsonify({
-                "code": customer_result["code"],
-                "message": "Failed to get customer information"
-            }), customer_result["code"]
+                "code": 400,
+                "message": "Missing required fields: session_id and customer_id are required"
+            }), 400
         
-        customer_data = customer_result["data"]
-        loyalty_points = customer_data["loyalty_points"]
-        loyalty_status = customer_data["loyalty_status"]
+        # If transaction_id is not provided, try to retrieve it from the Stripe session metadata
+        if not transaction_id:
+            # In a real implementation, you would call Stripe API to retrieve session details
+            # For now, we'll return an error
+            return jsonify({
+                "code": 400,
+                "message": "transaction_id is required"
+            }), 400
         
-        # Calculate loyalty points earned (1 point per $1 spent)
-        loyalty_points_added = int(payment_data["total_price_after_discount"])
-        new_loyalty_points = loyalty_points + loyalty_points_added
-        
-        # Update loyalty status if needed
-        new_loyalty_status = loyalty_status
-        if new_loyalty_points >= 300 and loyalty_status != "Gold":
-            new_loyalty_status = "Gold"
-        elif new_loyalty_points >= 100 and loyalty_status == "Bronze":
-            new_loyalty_status = "Silver"
-        
-        # Generate a unique transaction ID
-        transaction_id = f"TRANS{uuid.uuid4().hex[:8].upper()}"
-        
-        # Save transaction to database
-        transaction_data = {
-            "transaction_id": transaction_id,
-            "customer_id": customer_id,
-            "food_cost": payment_data["food_cost"],
-            "delivery_cost": payment_data["delivery_fee"],
-            "loyalty_discount_percentage": payment_data["loyalty_discount_percentage"],
-            "total_price_after_discount": payment_data["total_price_after_discount"],
-            "loyalty_points_added": loyalty_points_added,
-            "current_loyalty_points": new_loyalty_points,
-            "current_loyalty_status": new_loyalty_status,
-            "status": "Paid",
-            "voucher_id": payment_data["voucher_id"],
-            "rider_id": payment_data["rider_id"]
-        }
-        
-        transaction_result = invoke_http(
-            f"{transaction_URL}", 
-            method='POST',
-            json=transaction_data
+        # Step 1: Update transaction status to 'Paid'
+        transaction_status_update = invoke_http(
+            f"{transaction_URL}/{transaction_id}/status",
+            method='PUT',
+            json={"status": "Paid"}
         )
         
-        # Create a payment success notification
+        if transaction_status_update["code"] not in range(200, 300):
+            print(f"Failed to update transaction status: {transaction_status_update}")
+            # Continue processing even if this fails
+        
+        # Get transaction details to get the cart items and other information
+        transaction_details = invoke_http(f"{transaction_URL}/{transaction_id}", method='GET')
+        
+        if transaction_details["code"] not in range(200, 300):
+            return jsonify({
+                "code": transaction_details["code"],
+                "message": "Failed to retrieve transaction details"
+            }), transaction_details["code"]
+        
+        transaction_data = transaction_details["data"]
+        
+        # Get transaction items
+        transaction_items = invoke_http(
+            f"{transaction_item_URL}/transaction/{transaction_id}", 
+            method='GET'
+        )
+        
+        if transaction_items["code"] not in range(200, 300):
+            print(f"Failed to retrieve transaction items: {transaction_items}")
+            # Continue processing even if this fails
+        
+        # Step 2: Update inventory for each item
+        if transaction_items["code"] == 200 and "transaction_items" in transaction_items["data"]:
+            for item in transaction_items["data"]["transaction_items"]:
+                item_id = item["item_id"]
+                quantity = item["quantity"]
+                
+                # Get current inventory level
+                inventory_response = invoke_http(
+                    f"{restaurant_inventory_URL}/{item_id}",
+                    method='GET'
+                )
+                
+                if inventory_response["code"] == 200:
+                    current_stock = inventory_response["data"]["stock_quantity"]
+                    new_stock = max(0, current_stock - quantity)
+                    
+                    # Update inventory
+                    stock_update = invoke_http(
+                        f"{restaurant_inventory_URL}/update_stock/{item_id}",
+                        method='PUT',
+                        json={"stock_quantity": new_stock}
+                    )
+                    
+                    if stock_update["code"] not in range(200, 300):
+                        print(f"Failed to update stock for item {item_id}: {stock_update}")
+        
+        # Step 3: Update customer loyalty
+        # Calculate new loyalty points (already in the transaction data)
+        loyalty_points_added = transaction_data["loyalty_points_added"]
+        current_loyalty_points = transaction_data["current_loyalty_points"]
+        
+        # Update customer loyalty points
+        loyalty_update = invoke_http(
+            f"{customer_URL}/{customer_id}/loyalty",
+            method='PUT',
+            json={"loyalty_points": current_loyalty_points}
+        )
+        
+        if loyalty_update["code"] not in range(200, 300):
+            print(f"Failed to update customer loyalty: {loyalty_update}")
+        
+        # Step 4: Create success notification
         notification_id = f"NOTIF{uuid.uuid4().hex[:8].upper()}"
         notification_data = {
             "notification_id": notification_id,
@@ -327,36 +415,10 @@ def payment_success():
             json=notification_data
         )
         
-        # Create loyalty update notification if status changed
-        if new_loyalty_status != loyalty_status:
-            loyalty_notification_id = f"NOTIF{uuid.uuid4().hex[:8].upper()}"
-            loyalty_notification_data = {
-                "notification_id": loyalty_notification_id,
-                "customer_id": customer_id,
-                "message_type": "Loyalty_Updated",
-                "loyalty_points": new_loyalty_points,
-                "loyalty_status": new_loyalty_status,
-                "status": "Unread"
-            }
-            
-            loyalty_notification_result = invoke_http(
-                f"{notification_URL}/{loyalty_notification_id}",
-                method='POST',
-                json=loyalty_notification_data
-            )
+        if notification_result["code"] not in range(200, 300):
+            print(f"Failed to create notification: {notification_result}")
         
-        # Update customer's loyalty points and status
-        customer_update_data = {
-            "loyalty_points": new_loyalty_points,
-            "loyalty_status": new_loyalty_status
-        }
-        
-        customer_update_result = invoke_http(
-            f"{customer_URL}/{customer_id}",
-            method='PUT',
-            json=customer_update_data
-        )
-        
+        # Prepare the response
         return jsonify({
             "code": 200,
             "data": {
@@ -365,8 +427,9 @@ def payment_success():
                 "payment_status": "success",
                 "loyalty": {
                     "points_earned": loyalty_points_added,
-                    "new_total_points": new_loyalty_points,
-                    "status": new_loyalty_status
+                    "points_used": transaction_data.get("loyalty_points_used", 0),
+                    "new_total_points": current_loyalty_points,
+                    "status": transaction_data["current_loyalty_status"]
                 }
             }
         }), 200
@@ -398,14 +461,30 @@ def stripe_webhook():
             
             # Extract order details from metadata
             order_id = session.get('metadata', {}).get('order_id')
+            transaction_id = session.get('metadata', {}).get('transaction_id')
             customer_id = session.get('metadata', {}).get('customer_id')
             
             # Process the successful payment
-            # This would call your payment_success function or similar
-            # For now, we'll just return a success response
+            if transaction_id and customer_id:
+                # Call the payment_success function with the retrieved data
+                payment_data = {
+                    "session_id": session.id,
+                    "order_id": order_id,
+                    "transaction_id": transaction_id,
+                    "customer_id": customer_id
+                }
+                
+                # Create a new request to the payment_success endpoint
+                success_response = requests.post(
+                    f"http://localhost:5020/payment_success",
+                    json=payment_data
+                )
+                
+                if success_response.status_code == 200:
+                    return jsonify({"received": True, "success": True}), 200
+                else:
+                    return jsonify({"received": True, "success": False}), 200
             
-            return jsonify({"received": True, "success": True}), 200
-        
         return jsonify({"received": True}), 200
         
     except Exception as e:

@@ -226,7 +226,9 @@ services:
     environment:
       dynamic_pricing_URL: "http://calculateDynamicPricing:5016/calculate_delivery_fee"
       transaction_URL: "http://transaction:5009/transaction"
+      transaction_item_URL: "http://transaction_item:5010/transaction_item"
       notification_URL: "http://notification:5011/notification"
+      restaurant_inventory_URL: "http://restaurant_inventory:5008/restaurant_inventory"
       customer_URL: "http://customer:5006/customer"
       voucher_URL: "http://voucher:5012/voucher"
       stripe_service_URL: "http://stripeService:5021/payment/stripe"
@@ -238,7 +240,9 @@ services:
     depends_on:
       - calculateDynamicPricing
       - transaction
+      - transaction_item
       - notification
       - customer
       - voucher
       - stripeService
+      - restaurant_inventory

@@ -9,7 +9,18 @@
         <h1>Order Confirmed!</h1>
         <p class="success-message">Thank you for your order. Your payment has been successfully processed.</p>
         
-        <div class="order-details">
+        <div v-if="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading your order details...</p>
+        </div>
+        
+        <div v-else-if="error" class="error-state">
+          <i class="fas fa-exclamation-circle error-icon"></i>
+          <p>{{ error }}</p>
+          <button class="btn btn-primary" @click="reloadPage">Try Again</button>
+        </div>
+        
+        <div v-else class="order-details">
           <div class="detail-row">
             <span class="detail-label">Order ID:</span>
             <span class="detail-value">{{ orderId }}</span>
@@ -115,6 +126,7 @@ export default {
       const urlParams = new URLSearchParams(window.location.search);
       this.sessionId = urlParams.get('session_id');
     },
+    
     loadOrderSummary() {
       // Load order summary from localStorage (saved during checkout)
       const orderSummaryData = localStorage.getItem('orderSummary');
@@ -129,10 +141,22 @@ export default {
       // Load order ID from localStorage
       this.orderId = localStorage.getItem('orderId') || 'Unknown';
     },
+    
     async fetchPaymentStatus() {
       if (!this.sessionId) {
         return;
       }
+
+      // Get the transaction ID from localStorage
+      const transactionId = localStorage.getItem('transactionId');
+      
+      // Log the values being sent to help with debugging
+      console.log("Sending to payment_success:", {
+        session_id: this.sessionId,
+        order_id: this.orderId,
+        customer_id: this.getCustomerId(),
+        transaction_id: transactionId
+      });
       
       try {
         // Call the payment success endpoint to process the successful payment
@@ -144,9 +168,11 @@ export default {
           body: JSON.stringify({
             session_id: this.sessionId,
             order_id: this.orderId,
-            customer_id: this.getCustomerId()
+            customer_id: this.getCustomerId(),
+            transaction_id: transactionId
           })
         });
+
         
         if (!response.ok) {
           throw new Error('Failed to process payment status');
@@ -173,6 +199,7 @@ export default {
         this.error = 'Could not verify payment status. Your order might still be processing.';
       }
     },
+    
     getCustomerId() {
       const userData = localStorage.getItem('currentUser');
       if (userData) {
@@ -185,6 +212,7 @@ export default {
       }
       return null;
     },
+    
     updateUserLoyalty() {
       if (!this.loyaltyInfo) return;
       
@@ -204,28 +232,44 @@ export default {
         }
       }
     },
+    
     clearOrderData() {
       // Clear order data from localStorage after successful order
       setTimeout(() => {
         localStorage.removeItem('orderSummary');
         localStorage.removeItem('orderId');
-      }, 1000);
+        localStorage.removeItem('transactionId');
+        localStorage.removeItem('cart');
+      }, 3000);
+    },
+    
+    reloadPage() {
+      window.location.reload();
     }
   },
   async mounted() {
-    // Get query parameters
-    this.getQueryParams();
+    this.loading = true;
     
-    // Load order summary from localStorage
-    this.loadOrderSummary();
-    
-    // Fetch payment status if session ID is available
-    if (this.sessionId) {
-      await this.fetchPaymentStatus();
+    try {
+      // Get query parameters
+      this.getQueryParams();
+      
+      // Load order summary from localStorage
+      this.loadOrderSummary();
+      
+      // Fetch payment status if session ID is available
+      if (this.sessionId) {
+        await this.fetchPaymentStatus();
+      }
+      
+      // Clear order data after a delay
+      this.clearOrderData();
+    } catch (error) {
+      console.error('Error in OrderSuccess mounted:', error);
+      this.error = 'An error occurred while loading your order details.';
+    } finally {
+      this.loading = false;
     }
-    
-    // Clear order data after a delay
-    this.clearOrderData();
   }
 }
 </script>
@@ -261,6 +305,36 @@ export default {
   font-size: 1.2rem;
   color: #6c757d;
   margin-bottom: 2rem;
+}
+
+.loading-state {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-state {
+  color: var(--danger-color, #dc3545);
+  margin: 2rem 0;
+}
+
+.error-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
 }
 
 .order-details {

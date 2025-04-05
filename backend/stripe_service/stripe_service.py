@@ -33,6 +33,8 @@ def payment_success():
         
         # Get the delivery fee, order details, and loyalty points from metadata
         order_id = checkout_session.metadata.get('order_id', '')
+        transaction_id = checkout_session.metadata.get('transaction_id', '')
+        customer_id = checkout_session.metadata.get('customer_id', '')
         restaurant_name = checkout_session.metadata.get('restaurant_name', '')
         delivery_fee = checkout_session.metadata.get('delivery_fee', '0')
         subtotal = checkout_session.metadata.get('subtotal', '0')
@@ -45,6 +47,8 @@ def payment_success():
             amount_paid=amount_paid, 
             currency=payment_intent.currency.upper(),
             order_id=order_id,
+            transaction_id=transaction_id,
+            customer_id=customer_id,
             restaurant_name=restaurant_name,
             delivery_fee=delivery_fee,
             subtotal=subtotal,
@@ -66,6 +70,8 @@ def process_stripe_payment():
     
     # Required fields from the checkout process
     order_id = data.get('order_id', '')
+    transaction_id = data.get('transaction_id', '')
+    customer_id = data.get('customer_id', '')
     restaurant_name = data.get('restaurant_name', '')
     subtotal = data.get('subtotal', 0)
     delivery_fee = data.get('delivery_fee', 0)
@@ -87,6 +93,8 @@ def process_stripe_payment():
             product_description, 
             total_amount, 
             order_id,
+            transaction_id,
+            customer_id,
             restaurant_name,
             subtotal,
             delivery_fee,
@@ -100,6 +108,8 @@ def create_stripe_checkout_session(
     product_description, 
     total_amount, 
     order_id,
+    transaction_id,
+    customer_id,
     restaurant_name,
     subtotal,
     delivery_fee,
@@ -125,10 +135,12 @@ def create_stripe_checkout_session(
                 }
             ],
             mode='payment',
-            success_url="http://localhost:8080/app/order-success",
-            cancel_url="http://localhost:8080/app/home",
+            success_url="http://localhost:8080/app/order-success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url="http://localhost:8080/app/cart",
             metadata={
                 "order_id": order_id,
+                "transaction_id": transaction_id,
+                "customer_id": customer_id,
                 "restaurant_name": restaurant_name,
                 "subtotal": str(subtotal),
                 "delivery_fee": str(delivery_fee),
