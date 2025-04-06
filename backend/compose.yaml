@@ -3,23 +3,26 @@ networks:
     driver: bridge
     name: fooddelivery-net
 
-volumes:
-  rabbitmq_data:
-    driver: local
-
 services:
   ###################################
-  # RabbitMQ: The messaging broker
+  # RabbitMQ: Message Broker
   ###################################
   rabbitmq:
-    image: rabbitmq:management
-    hostname: rabbitmq  # Update this to 'rabbitmq' for Docker service name
-    restart: always
+    image: rabbitmq:3-management
+    container_name: rabbitmq
     ports:
-      - "5672:5672"    # AMQP protocol
-      - "15672:15672"  # RabbitMQ Management UI
+      - "5672:5672"   # AMQP protocol port
+      - "15672:15672" # Management UI port
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq  # Persist RabbitMQ data
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     networks:
       - fooddelivery-net
 
@@ -119,14 +122,20 @@ services:
     restart: always
     environment:
       dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
       PYTHONUNBUFFERED: 1
-      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672"  
     ports:
       - "5011:5011"
     networks:
       - fooddelivery-net
+    volumes:
+      - ./notification/templates:/templates
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   ###################################
   # Voucher: The Voucher microservice
@@ -237,6 +246,9 @@ services:
   ###################################
   # Process Customer Payment: The customer payment orchestration service
   ###################################
+  ###################################
+  # Process Customer Payment: The customer payment orchestration service
+  ###################################
   processCustomerPayment:
     build:
       context: ./processCustomerPayment/
@@ -257,15 +269,16 @@ services:
       - "5020:5020"
     networks:
       - fooddelivery-net
+    volumes:
+      - payment_data:/usr/src/app/data
     depends_on:
-      - calculateDynamicPricing
       - transaction
       - transaction_item
-      - notification
       - customer
       - voucher
       - stripeService
       - restaurant_inventory
+      # notification is no longer a required dependency
 
   ###################################
   # Create Customer Order: The order details microservice
@@ -331,3 +344,10 @@ services:
       - voucher
       - stripeService
       - restaurant_inventory
+      
+volumes:
+  rabbitmq_data:
+    driver: local
+  payment_data:
+    driver: local
+  

@@ -5,6 +5,7 @@ from os import environ
 from datetime import datetime
 import pika
 import json
+import uuid
 import threading
 import time
 
@@ -13,12 +14,19 @@ app = Flask(__name__)
 CORS(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/fooddelivery1"
+     environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/fooddelivery1"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_recycle': 299}
 
 db = SQLAlchemy(app)
+
+# AMQP Configuration
+RABBITMQ_HOST = environ.get('RABBITMQ_HOST') or 'localhost'
+RABBITMQ_PORT = int(environ.get('RABBITMQ_PORT') or 5672)
+RABBITMQ_USER = environ.get('RABBITMQ_USER') or 'guest'
+RABBITMQ_PASSWORD = environ.get('RABBITMQ_PASSWORD') or 'guest'
+NOTIFICATION_QUEUE = 'notification_queue'
 
 class Notification(db.Model):
     __tablename__ = "notification"
@@ -57,55 +65,135 @@ class Notification(db.Model):
             "created_at": self.created_at.strftime('%Y-%m-%d %H:%M:%S')
         }
 
-# RabbitMQ Consumer Logic
-def callback(ch, method, properties, body):
-    notification_data = json.loads(body)
-    print(f"Received Notification: {notification_data}")
-
-    # Create and store notification in the database
-    notification = Notification(
-        notification_id=notification_data['notification_id'],
-        customer_id=notification_data['customer_id'],
-        message_type=notification_data['message_type'],
-        transaction_id=notification_data.get('transaction_id'),
-        voucher_id=notification_data.get('voucher_id'),
-        loyalty_points=notification_data.get('loyalty_points'),
-        loyalty_status=notification_data.get('loyalty_status'),
-        status=notification_data.get('status', 'Unread')
-    )
-
-    try:
-        db.session.add(notification)
-        db.session.commit()
-        print("Notification saved!")
-    except Exception as e:
-        print(f"Error saving notification: {str(e)}")
-
-# Function to listen to RabbitMQ queues
-def listen_to_rabbitmq():
-    while True:
+# AMQP Helper Class
+class AMQPClient:
+    def __init__(self, host=RABBITMQ_HOST, port=RABBITMQ_PORT, 
+                 user=RABBITMQ_USER, password=RABBITMQ_PASSWORD):
+        self.host = host
+        self.port = port
+        self.user = user
+        self.password = password
+        self.connection = None
+        self.channel = None
+        self.connect()
+        
+    def connect(self):
         try:
-            connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672, '/', pika.PlainCredentials('guest', 'guest')))
-            channel = connection.channel()
-
-            # Declare the queues we're listening to
-            channel.queue_declare(queue='Notification_Success', durable=True)
-            channel.queue_declare(queue='Notification_Error', durable=True)
-
-            # Bind to both queues
-            channel.basic_consume(queue='Notification_Success', on_message_callback=callback, auto_ack=True)
-            channel.basic_consume(queue='Notification_Error', on_message_callback=callback, auto_ack=True)
-
-            print('Waiting for messages in Notification queues...')
-            channel.start_consuming()
+            credentials = pika.PlainCredentials(self.user, self.password)
+            parameters = pika.ConnectionParameters(
+                host=self.host,
+                port=self.port,
+                credentials=credentials,
+                heartbeat=30,
+                blocked_connection_timeout=300
+            )
+            self.connection = pika.BlockingConnection(parameters)
+            self.channel = self.connection.channel()
+            
+            # Declare a durable queue
+            self.channel.queue_declare(
+                queue=NOTIFICATION_QUEUE,
+                durable=True
+            )
+            print("Connected to RabbitMQ successfully")
         except Exception as e:
-            print(f"Error connecting to RabbitMQ: {e}")
-            time.sleep(5)  # Retry after 5 seconds if there's an error
+            print(f"Failed to connect to RabbitMQ: {str(e)}")
+            # Retry connection after a delay
+            time.sleep(5)
+            self.connect()
+    
+    def publish_message(self, message, routing_key=NOTIFICATION_QUEUE):
+        try:
+            if not self.connection or self.connection.is_closed:
+                self.connect()
+                
+            self.channel.basic_publish(
+                exchange='',
+                routing_key=routing_key,
+                body=json.dumps(message),
+                properties=pika.BasicProperties(
+                    delivery_mode=2,  # Makes message persistent
+                    content_type='application/json'
+                )
+            )
+            return True
+        except Exception as e:
+            print(f"Failed to publish message: {str(e)}")
+            # Try to reconnect
+            try:
+                self.connect()
+                return False
+            except:
+                return False
+    
+    def close(self):
+        if self.connection and self.connection.is_open:
+            self.connection.close()
 
-# Start the RabbitMQ listener in the background
-rabbitmq_thread = threading.Thread(target=listen_to_rabbitmq)
-rabbitmq_thread.daemon = True  # Ensures the thread will exit when the main program exits
-rabbitmq_thread.start()
+# Initialize AMQP client
+amqp_client = AMQPClient()
+
+# AMQP Consumer Thread
+def consume_messages():
+    consumer_client = AMQPClient()
+    
+    def callback(ch, method, properties, body):
+        try:
+            notification_data = json.loads(body)
+            
+            # Process the notification message
+            with app.app_context():
+                existing_notification = db.session.scalar(
+                    db.select(Notification).filter_by(notification_id=notification_data['notification_id'])
+                )
+                
+                if existing_notification:
+                    print(f"Notification {notification_data['notification_id']} already exists, skipping.")
+                    ch.basic_ack(delivery_tag=method.delivery_tag)
+                    return
+                
+                # Create new notification
+                notification = Notification(
+                    notification_id=notification_data['notification_id'],
+                    customer_id=notification_data['customer_id'],
+                    message_type=notification_data['message_type'],
+                    transaction_id=notification_data.get('transaction_id'),
+                    voucher_id=notification_data.get('voucher_id'),
+                    loyalty_points=notification_data.get('loyalty_points'),
+                    loyalty_status=notification_data.get('loyalty_status'),
+                    status=notification_data.get('status', 'Unread')
+                )
+                
+                try:
+                    db.session.add(notification)
+                    db.session.commit()
+                    print(f"Successfully processed notification {notification_data['notification_id']}")
+                    ch.basic_ack(delivery_tag=method.delivery_tag)
+                except Exception as e:
+                    print(f"Error processing notification: {str(e)}")
+                    db.session.rollback()
+                    # Negative acknowledgment to requeue the message
+                    ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+        except Exception as e:
+            print(f"Error in consumer callback: {str(e)}")
+            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+    
+    # Set prefetch count to 1 to ensure messages are distributed evenly
+    consumer_client.channel.basic_qos(prefetch_count=1)
+    
+    # Start consuming with manual acknowledgment
+    consumer_client.channel.basic_consume(
+        queue=NOTIFICATION_QUEUE,
+        on_message_callback=callback,
+        auto_ack=False
+    )
+    
+    print('Started consuming messages from queue')
+    consumer_client.channel.start_consuming()
+
+# Start the consumer thread
+consumer_thread = threading.Thread(target=consume_messages, daemon=True)
+consumer_thread.start()
 
 @app.route("/notification")
 def get_all():
@@ -120,6 +208,7 @@ def get_all():
         )
     return jsonify({"code": 404, "message": "There are no notifications."}), 404
 
+
 @app.route("/notification/<string:notification_id>")
 def find_by_notification_id(notification_id):
     notification = db.session.scalar(db.select(Notification).filter_by(notification_id=notification_id))
@@ -127,6 +216,7 @@ def find_by_notification_id(notification_id):
     if notification:
         return jsonify({"code": 200, "data": notification.json()})
     return jsonify({"code": 404, "message": "Notification not found."}), 404
+
 
 @app.route("/notification/customer/<string:customer_id>")
 def find_by_customer_id(customer_id):
@@ -138,6 +228,7 @@ def find_by_customer_id(customer_id):
             "data": {"notifications": [notification.json() for notification in notifications]}
         })
     return jsonify({"code": 404, "message": "No notifications found for this customer."}), 404
+
 
 @app.route("/notification/unread/customer/<string:customer_id>")
 def find_unread_by_customer_id(customer_id):
@@ -152,8 +243,10 @@ def find_unread_by_customer_id(customer_id):
         })
     return jsonify({"code": 404, "message": "No unread notifications found for this customer."}), 404
 
+
 @app.route("/notification/<string:notification_id>", methods=["POST"])
 def create_notification(notification_id):
+    # Check if notification already exists
     if db.session.scalar(db.select(Notification).filter_by(notification_id=notification_id)):
         return (
             jsonify(
@@ -182,35 +275,62 @@ def create_notification(notification_id):
             "message": f"Invalid message_type. Must be one of: {', '.join(valid_message_types)}"
         }), 400
     
-    # Create new notification
-    notification = Notification(
-        notification_id=notification_id,
-        customer_id=data["customer_id"],
-        message_type=data["message_type"],
-        transaction_id=data.get("transaction_id"),
-        voucher_id=data.get("voucher_id"),
-        loyalty_points=data.get("loyalty_points"),
-        loyalty_status=data.get("loyalty_status"),
-        status=data.get("status", "Unread")
-    )
+    # Prepare notification data
+    notification_data = {
+        "notification_id": notification_id,
+        "customer_id": data["customer_id"],
+        "message_type": data["message_type"],
+        "transaction_id": data.get("transaction_id"),
+        "voucher_id": data.get("voucher_id"),
+        "loyalty_points": data.get("loyalty_points"),
+        "loyalty_status": data.get("loyalty_status"),
+        "status": data.get("status", "Unread")
+    }
+    
+    # Publish to queue for durable processing
+    publish_success = amqp_client.publish_message(notification_data)
+    
+    if publish_success:
+        return jsonify({
+            "code": 202,  # Accepted
+            "data": {"notification_id": notification_id},
+            "message": "Notification request accepted and queued for processing."
+        }), 202
+    else:
+        # Fallback to direct database write if queue is unavailable
+        try:
+            notification = Notification(
+                notification_id=notification_id,
+                customer_id=data["customer_id"],
+                message_type=data["message_type"],
+                transaction_id=data.get("transaction_id"),
+                voucher_id=data.get("voucher_id"),
+                loyalty_points=data.get("loyalty_points"),
+                loyalty_status=data.get("loyalty_status"),
+                status=data.get("status", "Unread")
+            )
+            
+            db.session.add(notification)
+            db.session.commit()
+            
+            return jsonify({
+                "code": 201,
+                "data": notification.json(),
+                "message": "Notification created directly (queue unavailable)."
+            }), 201
+        except Exception as e:
+            print("Exception:{}".format(str(e)))
+            return (
+                jsonify(
+                    {
+                        "code": 500,
+                        "data": {"notification_id": notification_id},
+                        "message": "An error occurred creating the notification: " + str(e),
+                    }
+                ),
+                500,
+            )
 
-    try:
-        db.session.add(notification)
-        db.session.commit()
-    except Exception as e:
-        print("Exception:{}".format(str(e)))
-        return (
-            jsonify(
-                {
-                    "code": 500,
-                    "data": {"notification_id": notification_id},
-                    "message": "An error occurred creating the notification: " + str(e),
-                }
-            ),
-            500,
-        )
-
-    return jsonify({"code": 201, "data": notification.json()}), 201
 
 @app.route("/notification/<string:notification_id>/read", methods=["PUT"])
 def mark_as_read(notification_id):
@@ -324,6 +444,15 @@ def delete_notification(notification_id):
             ),
             500,
         )
+
+# Graceful shutdown handler
+def close_amqp_connection():
+    print("Closing AMQP connection")
+    amqp_client.close()
+
+# Register shutdown handler
+import atexit
+atexit.register(close_amqp_connection)
 
 # This will ensure the database tables match our models
 with app.app_context():
