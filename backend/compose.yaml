@@ -3,7 +3,26 @@ networks:
     driver: bridge
     name: fooddelivery-net
 
+volumes:
+  rabbitmq_data:
+    driver: local
+
 services:
+  ###################################
+  # RabbitMQ: The messaging broker
+  ###################################
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: rabbitmq  # Update this to 'rabbitmq' for Docker service name
+    restart: always
+    ports:
+      - "5672:5672"    # AMQP protocol
+      - "15672:15672"  # RabbitMQ Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq  # Persist RabbitMQ data
+    networks:
+      - fooddelivery-net
+
   ###################################
   # Customer: The Customer microservice
   ###################################
@@ -14,7 +33,7 @@ services:
     image: fooddelivery/customer:latest
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/fooddelivery1
       PYTHONUNBUFFERED: 1
     ports:
       - "5006:5006"
@@ -31,7 +50,7 @@ services:
     image: fooddelivery/restaurant:latest
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/fooddelivery1
       PYTHONUNBUFFERED: 1
     ports:
       - "5007:5007"
@@ -48,7 +67,7 @@ services:
     image: fooddelivery/restaurant_inventory:latest
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/fooddelivery1
       PYTHONUNBUFFERED: 1
     ports:
       - "5008:5008"
@@ -65,7 +84,7 @@ services:
     image: fooddelivery/transaction:latest
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/fooddelivery1
       PYTHONUNBUFFERED: 1
     ports:
       - "5009:5009"
@@ -82,7 +101,7 @@ services:
     image: fooddelivery/transaction_item:latest
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/fooddelivery1
       PYTHONUNBUFFERED: 1
     ports:
       - "5010:5010"
@@ -99,14 +118,15 @@ services:
     image: fooddelivery/notification:latest
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/fooddelivery1
       PYTHONUNBUFFERED: 1
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672"  
     ports:
       - "5011:5011"
     networks:
       - fooddelivery-net
-    volumes:
-      - ./notification/templates:/templates
+    depends_on:
+      - rabbitmq
 
   ###################################
   # Voucher: The Voucher microservice
@@ -118,7 +138,7 @@ services:
     image: fooddelivery/voucher:latest
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/fooddelivery1
       PYTHONUNBUFFERED: 1
     ports:
       - "5012:5012"
@@ -135,7 +155,7 @@ services:
     image: fooddelivery/rider:latest
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
+      dbURL: mysql+mysqlconnector://root:root@host.docker.internal:8889/fooddelivery1
       PYTHONUNBUFFERED: 1
     ports:
       - "5015:5015"
