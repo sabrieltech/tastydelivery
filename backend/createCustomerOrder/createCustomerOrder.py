@@ -15,7 +15,7 @@ transaction_item_URL = os.environ.get('transaction_item_URL') or "http://localho
 restaurant_URL = os.environ.get('restaurant_URL') or "http://localhost:5007/restaurant"
 restaurant_inventory_URL = os.environ.get('restaurant_inventory_URL') or "http://localhost:5008/restaurant_inventory"
 customer_URL = os.environ.get('customer_URL') or "http://localhost:5006/customer"
-rider_URL = os.environ.get('rider_URL') or "http://localhost:5015/rider"
+rider_URL = os.environ.get('https://personal-g86bdbq5.outsystemscloud.com/Rider/rest/v1/riders/')
 voucher_URL = os.environ.get('voucher_URL') or "http://localhost:5012/voucher"
 
 
@@ -152,8 +152,10 @@ def get_order_details(transaction_id):
             "address": customer_data["address"] if customer_data and "address" in customer_data else "123 Customer Address St, Singapore",
             "rider_name": rider_info["name"] if rider_info else "Assigned Rider",
             "rider_phone": rider_info["phone_number"] if rider_info else "Not available",
+            "rider_vehicle": rider_info["vehicle_type"] if rider_info else "Not available",
             "estimated_time": "30-45 minutes",  # Placeholder, could be calculated from dynamic pricing
-            "status": transaction_data["status"]
+            "status": transaction_data["status"],
+            "rider_status": rider_info["availability_status"] if rider_info else "Unknown"
         }
         
         # Calculate discount amounts
@@ -269,18 +271,30 @@ def get_restaurant_info(restaurant_id):
         print(f"Error getting restaurant info: {str(e)}")
         return None
 
-
 def get_rider_info(rider_id):
     """Get rider information"""
     try:
         print(f'\n-----Invoking rider microservice for rider {rider_id}-----')
-        rider_result = invoke_http(f"{rider_URL}/{rider_id}", method='GET')
-        print('rider_result:', rider_result)
+        # Check rider service health first
+            
+        # Get all riders and find the one with matching phone_number
+        all_riders_result = invoke_http(f"https://personal-g86bdbq5.outsystemscloud.com/Rider/rest/v1/riders/", method='GET')
+        print('all_riders_result:', all_riders_result)
         
-        return rider_result
+        if "Riders" in all_riders_result["Result"]:
+            for rider in all_riders_result["Result"]["Riders"]:
+                if rider["phone_number"] == rider_id:
+                    return {"code": 200, "data": rider}
+            
+            # If no rider found with that phone number
+            return {"code": 404, "message": f"No rider found with phone number {rider_id}"}
+        else:
+            return {"code": 500, "message": "Invalid response format from rider service"}
+            
     except Exception as e:
         print(f"Error getting rider info: {str(e)}")
-        return None
+        return {"code": 500, "message": f"Error getting rider info: {str(e)}"}
+
 
 
 def get_voucher_info(voucher_id):
@@ -340,6 +354,140 @@ def enrich_item_with_details(item):
             "options": []  # Add empty options array for potential future use
         }
 
+
+# Add a health check endpoint for OutSystems monitoring
+@app.route("/health", methods=["GET"])
+def health_check():
+    return jsonify({
+        "status": "healthy",
+        "service": "order-service",
+        "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }), 200
+
+
+@app.route("/order/assign/<string:transaction_id>/<string:rider_id>", methods=['PUT'])
+def assign_rider_to_order(transaction_id, rider_phone):
+    """
+    Assign a rider to a specific order/transaction
+    This is a composite service that orchestrates multiple atomic services
+    """
+    try:
+        # 1. Check if the rider exists and is available
+        rider_result = get_rider_info(rider_phone)
+        if rider_result["code"] not in range(200, 300):
+            return jsonify({
+                "code": rider_result["code"],
+                "message": "Failed to get rider information"
+            }), rider_result["code"]
+        
+        rider_data = rider_result["data"]
+        if rider_data["availability_status"] != "Available":
+            return jsonify({
+                "code": 400,
+                "message": f"Rider is not available. Current status: {rider_data['availability_status']}"
+            }), 400
+        
+        # 2. Check if the transaction exists
+        transaction_result = get_transaction_info(transaction_id)
+        if transaction_result["code"] not in range(200, 300):
+            return jsonify({
+                "code": transaction_result["code"],
+                "message": "Failed to get transaction information"
+            }), transaction_result["code"]
+        
+        # 3. Assign the rider to the transaction
+        assign_data = {
+            "transaction_id": transaction_id
+        }
+        
+        print(f'\n-----Assigning rider {rider_phone} to transaction {transaction_id}-----')
+        assignment_result = invoke_http(f"{rider_URL}/riders/{rider_phone}/assign", method='PUT', json=assign_data)
+        print('assignment_result:', assignment_result)
+        
+        if assignment_result["code"] not in range(200, 300):
+            return jsonify({
+                "code": assignment_result["code"],
+                "message": "Failed to assign rider to transaction"
+            }), assignment_result["code"]
+        
+        # 4. Update the transaction with the rider phone
+        transaction_update = {
+            "rider_id": rider_phone,  # Using phone as the rider_id
+            "status": "In Progress"  # Update status to show that delivery is in progress
+        }
+        
+        print(f'\n-----Updating transaction {transaction_id} with rider {rider_phone}-----')
+        transaction_update_result = invoke_http(f"{transaction_URL}/{transaction_id}", method='PUT', json=transaction_update)
+        print('transaction_update_result:', transaction_update_result)
+        
+        # Return the updated order details
+        return get_order_details(transaction_id)
+        
+    except Exception as e:
+        # Unexpected error
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
+        print(ex_str)
+
+        return jsonify({
+            "code": 500,
+            "message": "createCustomerOrder.py internal error: " + ex_str
+        }), 500
+
+
+@app.route("/order/complete/<string:transaction_id>", methods=['PUT'])
+def complete_order(transaction_id):
+    """
+    Mark an order as completed and unassign the rider
+    This is a composite service that orchestrates multiple atomic services
+    """
+    try:
+        # 1. Get the transaction details to find the rider
+        transaction_result = get_transaction_info(transaction_id)
+        if transaction_result["code"] not in range(200, 300):
+            return jsonify({
+                "code": transaction_result["code"],
+                "message": "Failed to get transaction information"
+            }), transaction_result["code"]
+        
+        transaction_data = transaction_result["data"]
+        rider_phone = transaction_data.get("rider_id")  # Now contains phone number
+        
+        if not rider_phone:
+            return jsonify({
+                "code": 400,
+                "message": "No rider assigned to this transaction"
+            }), 400
+        
+        # 2. Update the transaction status
+        transaction_update = {
+            "status": "Completed"
+        }
+        
+        print(f'\n-----Updating transaction {transaction_id} to Completed-----')
+        transaction_update_result = invoke_http(f"{transaction_URL}/{transaction_id}", method='PUT', json=transaction_update)
+        print('transaction_update_result:', transaction_update_result)
+        
+        # 3. Unassign the rider from the transaction
+        print(f'\n-----Unassigning rider {rider_phone} from transaction {transaction_id}-----')
+        unassign_result = invoke_http(f"{rider_URL}/riders/{rider_phone}/unassign", method='PUT')
+        print('unassign_result:', unassign_result)
+        
+        # Return the updated order details
+        return get_order_details(transaction_id)
+        
+    except Exception as e:
+        # Unexpected error
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
+        print(ex_str)
+
+        return jsonify({
+            "code": 500,
+            "message": "createCustomerOrder.py internal error: " + ex_str
+        }), 500
 
 # Execute this program if it is run as a main script (not by 'import')
 if __name__ == "__main__":

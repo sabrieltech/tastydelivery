@@ -246,9 +246,6 @@ services:
   ###################################
   # Process Customer Payment: The customer payment orchestration service
   ###################################
-  ###################################
-  # Process Customer Payment: The customer payment orchestration service
-  ###################################
   processCustomerPayment:
     build:
       context: ./processCustomerPayment/
@@ -282,9 +279,6 @@ services:
 
   ###################################
   # Create Customer Order: The order details microservice
-  ###################################
-  ###################################
-  # Order Details: The order details orchestration service
   ###################################
   createCustomerOrder:
     build:

@@ -1,82 +1,52 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
+import requests
 from os import environ
 from datetime import datetime
 
 app = Flask(__name__)
-
 CORS(app)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-     environ.get("dbURL") or "mysql+mysqlconnector://root@localhost:3306/fooddelivery1"
-)
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_recycle': 299}
+# Base URL for the REST API
+API_BASE_URL = environ.get("API_URL") or "https://personal-g86bdbq5.outsystemscloud.com/Rider/rest/v1"
 
-db = SQLAlchemy(app)
-
-
-class Rider(db.Model):
-    __tablename__ = "rider"
-
-    rider_id = db.Column(db.String(32), primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
-    phone_number = db.Column(db.String(20), nullable=False)
-    vehicle_type = db.Column(db.Enum('Bicycle', 'Motorcycle', 'Car'), nullable=False)
-    availability_status = db.Column(db.Enum('Available', 'On Delivery', 'Offline'), nullable=False, default='Available')
-    latitude = db.Column(db.DECIMAL(10, 8), nullable=False)
-    longitude = db.Column(db.DECIMAL(11, 8), nullable=False)
-    assigned_transaction_id = db.Column(db.String(32), nullable=True)
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now)
-
-    def __init__(self, rider_id, name, phone_number, vehicle_type, latitude, longitude, 
-                availability_status='Available', assigned_transaction_id=None):
-        self.rider_id = rider_id
-        self.name = name
-        self.phone_number = phone_number
-        self.vehicle_type = vehicle_type
-        self.availability_status = availability_status
-        self.latitude = latitude
-        self.longitude = longitude
-        self.assigned_transaction_id = assigned_transaction_id
-
-    def json(self):
-        return {
-            "rider_id": self.rider_id,
-            "name": self.name,
-            "phone_number": self.phone_number,
-            "vehicle_type": self.vehicle_type,
-            "availability_status": self.availability_status,
-            "latitude": float(self.latitude),
-            "longitude": float(self.longitude),
-            "assigned_transaction_id": self.assigned_transaction_id,
-            "created_at": self.created_at.strftime('%Y-%m-%d %H:%M:%S')
-        }
-
+# Helper function to make API requests
+def api_request(method, endpoint, data=None, params=None):
+    url = f"{API_BASE_URL}/{endpoint}"
+    try:
+        if method == "GET":
+            response = requests.get(url, params=params)
+        elif method == "POST":
+            response = requests.post(url, json=data)
+        elif method == "PUT":
+            response = requests.put(url, json=data)
+        elif method == "DELETE":
+            response = requests.delete(url)
+        
+        response.raise_for_status()  # Raise exception for 4XX/5XX responses
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"API request error: {str(e)}")
+        return None
 
 @app.route("/rider")
 def get_all():
-    riderlist = db.session.scalars(db.select(Rider)).all()
-
-    if len(riderlist):
-        return jsonify(
-            {
-                "code": 200,
-                "data": {"riders": [rider.json() for rider in riderlist]},
-            }
-        )
+    response = api_request("GET", "riders")
+    
+    if response and "riders" in response:
+        return jsonify({
+            "code": 200,
+            "data": {"riders": response["riders"]}
+        })
     return jsonify({"code": 404, "message": "There are no riders."}), 404
-
 
 @app.route("/rider/<string:rider_id>")
 def find_by_rider_id(rider_id):
-    rider = db.session.scalar(db.select(Rider).filter_by(rider_id=rider_id))
-
-    if rider:
-        return jsonify({"code": 200, "data": rider.json()})
+    response = api_request("GET", f"riders/{rider_id}")
+    
+    if response:
+        return jsonify({"code": 200, "data": response})
     return jsonify({"code": 404, "message": "Rider not found."}), 404
-
 
 @app.route("/rider/status/<string:status>")
 def find_by_status(status):
@@ -87,16 +57,15 @@ def find_by_status(status):
             "code": 400,
             "message": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
         }), 400
-        
-    riders = db.session.scalars(db.select(Rider).filter_by(availability_status=status)).all()
-
-    if len(riders):
+    
+    response = api_request("GET", "riders", params={"availability_status": status})
+    
+    if response and "riders" in response and len(response["riders"]) > 0:
         return jsonify({
             "code": 200,
-            "data": {"riders": [rider.json() for rider in riders]}
+            "data": {"riders": response["riders"]}
         })
     return jsonify({"code": 404, "message": f"No riders found with status '{status}'."}), 404
-
 
 @app.route("/rider/vehicle/<string:vehicle_type>")
 def find_by_vehicle_type(vehicle_type):
@@ -107,41 +76,40 @@ def find_by_vehicle_type(vehicle_type):
             "code": 400,
             "message": f"Invalid vehicle type. Must be one of: {', '.join(valid_types)}"
         }), 400
-        
-    riders = db.session.scalars(db.select(Rider).filter_by(vehicle_type=vehicle_type)).all()
-
-    if len(riders):
+    
+    response = api_request("GET", "riders", params={"vehicle_type": vehicle_type})
+    
+    if response and "riders" in response and len(response["riders"]) > 0:
         return jsonify({
             "code": 200,
-            "data": {"riders": [rider.json() for rider in riders]}
+            "data": {"riders": response["riders"]}
         })
     return jsonify({"code": 404, "message": f"No riders found with vehicle type '{vehicle_type}'."}), 404
 
-
 @app.route("/rider/available")
 def get_available_riders():
-    riders = db.session.scalars(db.select(Rider).filter_by(availability_status='Available')).all()
-
-    if len(riders):
+    response = api_request("GET", "riders", params={"availability_status": "Available"})
+    
+    if response and "riders" in response and len(response["riders"]) > 0:
         return jsonify({
             "code": 200,
-            "data": {"riders": [rider.json() for rider in riders]}
+            "data": {"riders": response["riders"]}
         })
     return jsonify({"code": 404, "message": "No available riders found."}), 404
 
-
 @app.route("/rider/transaction/<string:transaction_id>")
 def find_by_transaction_id(transaction_id):
-    rider = db.session.scalar(db.select(Rider).filter_by(assigned_transaction_id=transaction_id))
-
-    if rider:
-        return jsonify({"code": 200, "data": rider.json()})
+    response = api_request("GET", "riders", params={"assigned_transaction_id": transaction_id})
+    
+    if response and "riders" in response and len(response["riders"]) > 0:
+        return jsonify({"code": 200, "data": response["riders"][0]})
     return jsonify({"code": 404, "message": "No rider assigned to this transaction."}), 404
-
 
 @app.route("/rider/<string:rider_id>", methods=["POST"])
 def create_rider(rider_id):
-    if db.session.scalar(db.select(Rider).filter_by(rider_id=rider_id)):
+    # Check if rider exists first
+    existing = api_request("GET", f"riders/{rider_id}")
+    if existing:
         return (
             jsonify(
                 {
@@ -169,41 +137,34 @@ def create_rider(rider_id):
             "message": f"Invalid vehicle type. Must be one of: {', '.join(valid_vehicle_types)}"
         }), 400
 
-    rider = Rider(
-        rider_id=rider_id,
-        name=data["name"],
-        phone_number=data["phone_number"],
-        vehicle_type=data["vehicle_type"],
-        latitude=data["latitude"],
-        longitude=data["longitude"],
-        availability_status=data.get("availability_status", "Available"),
-        assigned_transaction_id=data.get("assigned_transaction_id")
+    # Add rider_id to data
+    rider_data = data.copy()
+    rider_data["rider_id"] = rider_id
+    
+    # Set defaults if not provided
+    if "availability_status" not in rider_data:
+        rider_data["availability_status"] = "Available"
+
+    response = api_request("POST", "riders", data=rider_data)
+    
+    if response:
+        return jsonify({"code": 201, "data": response}), 201
+    return (
+        jsonify(
+            {
+                "code": 500,
+                "data": {"rider_id": rider_id},
+                "message": "An error occurred creating the rider.",
+            }
+        ),
+        500,
     )
-
-    try:
-        db.session.add(rider)
-        db.session.commit()
-    except Exception as e:
-        print("Exception:{}".format(str(e)))
-        return (
-            jsonify(
-                {
-                    "code": 500,
-                    "data": {"rider_id": rider_id},
-                    "message": "An error occurred creating the rider: " + str(e),
-                }
-            ),
-            500,
-        )
-
-    return jsonify({"code": 201, "data": rider.json()}), 201
-
 
 @app.route("/rider/<string:rider_id>", methods=["PUT"])
 def update_rider(rider_id):
-    rider = db.session.scalar(db.select(Rider).filter_by(rider_id=rider_id))
-    
-    if not rider:
+    # Check if rider exists
+    existing = api_request("GET", f"riders/{rider_id}")
+    if not existing:
         return (
             jsonify(
                 {
@@ -235,39 +196,32 @@ def update_rider(rider_id):
                 "message": f"Invalid availability status. Must be one of: {', '.join(valid_statuses)}"
             }), 400
 
-    try:
-        # Update rider attributes
-        for key, value in data.items():
-            if hasattr(rider, key):
-                setattr(rider, key, value)
-        
-        db.session.commit()
+    response = api_request("PUT", f"riders/{rider_id}", data=data)
+    
+    if response:
         return jsonify(
             {
                 "code": 200,
-                "data": rider.json(),
+                "data": response,
                 "message": "Rider updated successfully."
             }
         )
-    except Exception as e:
-        print("Exception:{}".format(str(e)))
-        return (
-            jsonify(
-                {
-                    "code": 500,
-                    "data": {"rider_id": rider_id},
-                    "message": "An error occurred updating the rider: " + str(e),
-                }
-            ),
-            500,
-        )
-
+    return (
+        jsonify(
+            {
+                "code": 500,
+                "data": {"rider_id": rider_id},
+                "message": "An error occurred updating the rider.",
+            }
+        ),
+        500,
+    )
 
 @app.route("/rider/<string:rider_id>", methods=["DELETE"])
 def delete_rider(rider_id):
-    rider = db.session.scalar(db.select(Rider).filter_by(rider_id=rider_id))
-    
-    if not rider:
+    # Check if rider exists
+    existing = api_request("GET", f"riders/{rider_id}")
+    if not existing:
         return (
             jsonify(
                 {
@@ -279,34 +233,31 @@ def delete_rider(rider_id):
             404,
         )
 
-    try:
-        db.session.delete(rider)
-        db.session.commit()
+    response = api_request("DELETE", f"riders/{rider_id}")
+    
+    if response:
         return jsonify(
             {
                 "code": 200,
                 "message": "Rider deleted successfully."
             }
         )
-    except Exception as e:
-        print("Exception:{}".format(str(e)))
-        return (
-            jsonify(
-                {
-                    "code": 500,
-                    "data": {"rider_id": rider_id},
-                    "message": "An error occurred deleting the rider: " + str(e),
-                }
-            ),
-            500,
-        )
-
+    return (
+        jsonify(
+            {
+                "code": 500,
+                "data": {"rider_id": rider_id},
+                "message": "An error occurred deleting the rider.",
+            }
+        ),
+        500,
+    )
 
 @app.route("/rider/<string:rider_id>/location", methods=["PUT"])
 def update_location(rider_id):
-    rider = db.session.scalar(db.select(Rider).filter_by(rider_id=rider_id))
-    
-    if not rider:
+    # Check if rider exists
+    existing = api_request("GET", f"riders/{rider_id}")
+    if not existing:
         return (
             jsonify(
                 {
@@ -331,36 +282,37 @@ def update_location(rider_id):
             400,
         )
 
-    try:
-        rider.latitude = data['latitude']
-        rider.longitude = data['longitude']
-        db.session.commit()
+    update_data = {
+        "latitude": data['latitude'],
+        "longitude": data['longitude']
+    }
+    
+    response = api_request("PUT", f"riders/{rider_id}/location", data=update_data)
+    
+    if response:
         return jsonify(
             {
                 "code": 200,
-                "data": rider.json(),
+                "data": response,
                 "message": "Rider location updated successfully."
             }
         )
-    except Exception as e:
-        print("Exception:{}".format(str(e)))
-        return (
-            jsonify(
-                {
-                    "code": 500,
-                    "data": {"rider_id": rider_id},
-                    "message": "An error occurred updating rider location: " + str(e),
-                }
-            ),
-            500,
-        )
-
+    return (
+        jsonify(
+            {
+                "code": 500,
+                "data": {"rider_id": rider_id},
+                "message": "An error occurred updating rider location.",
+            }
+        ),
+        500,
+    )
 
 @app.route("/rider/<string:rider_id>/status", methods=["PUT"])
 def update_status(rider_id):
-    rider = db.session.scalar(db.select(Rider).filter_by(rider_id=rider_id))
-    
-    if not rider:
+    # Check if rider exists
+    existing = api_request("GET", f"riders/{rider_id}")
+    if not existing:
         return (
             jsonify(
                 {
@@ -393,35 +345,36 @@ def update_status(rider_id):
             "message": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
         }), 400
 
-    try:
-        rider.availability_status = data['availability_status']
-        db.session.commit()
+    update_data = {
+        "availability_status": data['availability_status']
+    }
+    
+    response = api_request("PUT", f"riders/{rider_id}/status", data=update_data)
+    
+    if response:
         return jsonify(
             {
                 "code": 200,
-                "data": rider.json(),
+                "data": response,
                 "message": "Rider status updated successfully."
             }
         )
-    except Exception as e:
-        print("Exception:{}".format(str(e)))
-        return (
-            jsonify(
-                {
-                    "code": 500,
-                    "data": {"rider_id": rider_id},
-                    "message": "An error occurred updating rider status: " + str(e),
-                }
-            ),
-            500,
-        )
-
+    return (
+        jsonify(
+            {
+                "code": 500,
+                "data": {"rider_id": rider_id},
+                "message": "An error occurred updating rider status.",
+            }
+        ),
+        500,
+    )
 
 @app.route("/rider/<string:rider_id>/assign", methods=["PUT"])
 def assign_transaction(rider_id):
-    rider = db.session.scalar(db.select(Rider).filter_by(rider_id=rider_id))
-    
-    if not rider:
+    # Check if rider exists
+    existing = api_request("GET", f"riders/{rider_id}")
+    if not existing:
         return (
             jsonify(
                 {
@@ -446,37 +399,36 @@ def assign_transaction(rider_id):
             400,
         )
 
-    try:
-        # Update the assigned transaction ID and change status to On Delivery
-        rider.assigned_transaction_id = data['transaction_id']
-        rider.availability_status = 'On Delivery'
-        db.session.commit()
+    update_data = {
+        "transaction_id": data['transaction_id']
+    }
+    
+    response = api_request("PUT", f"riders/{rider_id}/assign", data=update_data)
+    
+    if response:
         return jsonify(
             {
                 "code": 200,
-                "data": rider.json(),
+                "data": response,
                 "message": "Transaction assigned to rider successfully."
             }
         )
-    except Exception as e:
-        print("Exception:{}".format(str(e)))
-        return (
-            jsonify(
-                {
-                    "code": 500,
-                    "data": {"rider_id": rider_id},
-                    "message": "An error occurred assigning transaction to rider: " + str(e),
-                }
-            ),
-            500,
-        )
-
+    return (
+        jsonify(
+            {
+                "code": 500,
+                "data": {"rider_id": rider_id},
+                "message": "An error occurred assigning transaction to rider.",
+            }
+        ),
+        500,
+    )
 
 @app.route("/rider/<string:rider_id>/unassign", methods=["PUT"])
 def unassign_transaction(rider_id):
-    rider = db.session.scalar(db.select(Rider).filter_by(rider_id=rider_id))
-    
-    if not rider:
+    # Check if rider exists
+    existing = api_request("GET", f"riders/{rider_id}")
+    if not existing:
         return (
             jsonify(
                 {
@@ -487,32 +439,27 @@ def unassign_transaction(rider_id):
             ),
             404,
         )
-
-    try:
-        # Clear the assigned transaction ID and change status to Available
-        rider.assigned_transaction_id = None
-        rider.availability_status = 'Available'
-        db.session.commit()
+    
+    response = api_request("PUT", f"riders/{rider_id}/unassign")
+    
+    if response:
         return jsonify(
             {
                 "code": 200,
-                "data": rider.json(),
+                "data": response,
                 "message": "Transaction unassigned from rider successfully."
             }
         )
-    except Exception as e:
-        print("Exception:{}".format(str(e)))
-        return (
-            jsonify(
-                {
-                    "code": 500,
-                    "data": {"rider_id": rider_id},
-                    "message": "An error occurred unassigning transaction from rider: " + str(e),
-                }
-            ),
-            500,
-        )
-
+    return (
+        jsonify(
+            {
+                "code": 500,
+                "data": {"rider_id": rider_id},
+                "message": "An error occurred unassigning transaction from rider.",
+            }
+        ),
+        500,
+    )
 
 @app.route("/rider/nearest", methods=["POST"])
 def find_nearest_available_rider():
@@ -529,13 +476,7 @@ def find_nearest_available_rider():
             400,
         )
     
-    # Get all available riders
-    available_riders = db.session.scalars(db.select(Rider).filter_by(availability_status='Available')).all()
-    
-    if not available_riders:
-        return jsonify({"code": 404, "message": "No available riders found."}), 404
-    
-    # Filter by vehicle type if provided
+    # If vehicle_type is provided, validate it
     if 'vehicle_type' in data:
         valid_vehicle_types = ['Bicycle', 'Motorcycle', 'Car']
         if data['vehicle_type'] not in valid_vehicle_types:
@@ -543,42 +484,16 @@ def find_nearest_available_rider():
                 "code": 400,
                 "message": f"Invalid vehicle type. Must be one of: {', '.join(valid_vehicle_types)}"
             }), 400
-        
-        available_riders = [rider for rider in available_riders if rider.vehicle_type == data['vehicle_type']]
-        
-        if not available_riders:
-            return jsonify({
-                "code": 404, 
-                "message": f"No available riders found with vehicle type '{data['vehicle_type']}'."
-            }), 404
     
-    # Calculate distances and find the nearest rider
-    request_lat = float(data['latitude'])
-    request_lon = float(data['longitude'])
+    # Call the API to find the nearest rider
+    response = api_request("POST", "riders/nearest", data=data)
     
-    nearest_rider = None
-    min_distance = float('inf')
-    
-    for rider in available_riders:
-        rider_lat = float(rider.latitude)
-        rider_lon = float(rider.longitude)
-        
-        # Use simplified distance calculation (Euclidean distance for demonstration)
-        # In a real application, you might want to use the Haversine formula or a mapping API
-        distance = ((rider_lat - request_lat) ** 2 + (rider_lon - request_lon) ** 2) ** 0.5
-        
-        if distance < min_distance:
-            min_distance = distance
-            nearest_rider = rider
-    
-    return jsonify({
-        "code": 200,
-        "data": {
-            "rider": nearest_rider.json(),
-            "distance": min_distance
-        }
-    })
-
+    if response and "rider" in response:
+        return jsonify({
+            "code": 200,
+            "data": response
+        })
+    return jsonify({"code": 404, "message": "No available riders found."}), 404
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5015, debug=True)

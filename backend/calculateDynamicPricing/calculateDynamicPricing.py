@@ -13,7 +13,7 @@ CORS(app)
 
 # URLs for the atomic microservices
 restaurant_URL = os.environ.get('restaurant_URL') or "http://localhost:5007/restaurant"
-rider_URL = os.environ.get('rider_URL') or "http://localhost:5015/rider"
+rider_URL = os.environ.get('https://personal-g86bdbq5.outsystemscloud.com/Rider/rest/v1/riders/')
 
 # Helper function for HTTP requests to other microservices
 def invoke_http(url, method='GET', json=None, **kwargs):
@@ -252,11 +252,13 @@ def getStaticMapImageUrl(restaurant_coords, rider_coords):
         print(f"Error generating static map image URL: {str(e)}")
         return None
 
-@app.route("/calculate_delivery_fee/<string:restaurant_id>/<string:rider_id>", methods=['GET'])
-def get_dynamic_price(restaurant_id, rider_id):
+@app.route("/calculate_delivery_fee/<string:restaurant_id>/<string:phone_number>", methods=['GET'])
+def get_dynamic_price(restaurant_id, phone_number):
     """
     Calculate the dynamic delivery fee based on distance between restaurant and rider
     This is a composite service that orchestrates multiple atomic services
+    Uses the rider's phone number as the primary key to identify the rider
+    If phone_number is "auto", selects the closest available rider automatically
     """
     try:
         # Create the result dictionary
@@ -288,23 +290,126 @@ def get_dynamic_price(restaurant_id, rider_id):
 
         # 2. Get rider coordinates
         print('\n-----Invoking rider microservice-----')
-        rider_result = invoke_http(f"{rider_URL}/{rider_id}", method='GET')
+        rider_result = invoke_http(f"https://personal-g86bdbq5.outsystemscloud.com/Rider/rest/v1/riders/", method='GET')
         print('rider_result:', rider_result)
         
-        if rider_result["code"] not in range(200, 300):
+        if "Result" not in rider_result or not rider_result["Result"]["Success"]:
+            health_result = invoke_http(f"https://personal-g86bdbq5.outsystemscloud.com/Rider/rest/v1/riders/", method='GET')
+            
+            if "Result" not in health_result or not health_result["Result"]["Success"]:
+                return jsonify({
+                    "code": 503,
+                    "message": "Rider service is unavailable"
+                }), 503
+            
             return jsonify({
-                "code": rider_result["code"],
+                "code": 400,
                 "message": "Failed to get rider information"
-            }), rider_result["code"]
+            }), 400
         
-        rider_data = rider_result["data"]
+        # Helper function to calculate Haversine distance between two points
+        def calculate_distance(lat1, lon1, lat2, lon2):
+            """
+            Calculate the Haversine distance between two points
+            specified by their latitude and longitude in degrees.
+            Returns distance in kilometers.
+            """
+            # Convert latitude and longitude from degrees to radians
+            lat1 = float(lat1) * (3.14159 / 180.0)
+            lon1 = float(lon1) * (3.14159 / 180.0)
+            lat2 = float(lat2) * (3.14159 / 180.0)
+            lon2 = float(lon2) * (3.14159 / 180.0)
+            
+            # Haversine formula
+            dlon = lon2 - lon1
+            dlat = lat2 - lat1
+            a = pow(sin(dlat/2), 2) + cos(lat1) * cos(lat2) * pow(sin(dlon/2), 2)
+            c = 2 * asin(sqrt(a))
+            r = 6371  # Radius of Earth in kilometers
+            return c * r
+        
+        # Get all available riders
+        available_riders = [rider for rider in rider_result["Riders"] if rider["availability_status"] == "Available"]
+        
+        if not available_riders:
+            return jsonify({
+                "code": 404,
+                "message": "No available riders found"
+            }), 404
+        
+        # Check if we need to find a specific rider by phone number or the closest rider
+        if phone_number != "auto":
+            # Try to find the rider with the specified phone number
+            matched_riders = [rider for rider in rider_result["Riders"] if rider["phone_number"] == phone_number]
+            
+            if matched_riders:
+                selected_rider = matched_riders[0]
+                # Check if the rider is available
+                if selected_rider["availability_status"] != "Available":
+                    return jsonify({
+                        "code": 400,
+                        "message": f"Rider with phone number {phone_number} is not available (current status: {selected_rider['availability_status']})"
+                    }), 400
+            else:
+                # If specified rider not found, find the closest available rider
+                # First, import necessary math functions if not already at the top of the file
+                from math import sin, cos, sqrt, asin
+                
+                # Calculate distance from restaurant to each available rider
+                for rider in available_riders:
+                    rider["distance_to_restaurant"] = calculate_distance(
+                        restaurant_coords[0], restaurant_coords[1],
+                        rider["latitude"], rider["longitude"]
+                    )
+                
+                # Sort riders by distance
+                available_riders.sort(key=lambda x: x["distance_to_restaurant"])
+                
+                # Select the closest available rider
+                selected_rider = available_riders[0]
+                
+                # Inform that we're using the closest rider instead
+                print(f"Rider with phone number {phone_number} not found or not available. Using closest available rider instead.")
+        else:
+            # Auto mode - find the closest available rider
+            # First, import necessary math functions if not already at the top of the file
+            from math import sin, cos, sqrt, asin
+            
+            # Calculate distance from restaurant to each available rider
+            for rider in available_riders:
+                rider["distance_to_restaurant"] = calculate_distance(
+                    restaurant_coords[0], restaurant_coords[1],
+                    rider["latitude"], rider["longitude"]
+                )
+            
+            # Sort riders by distance
+            available_riders.sort(key=lambda x: x["distance_to_restaurant"])
+            
+            # Select the closest available rider
+            selected_rider = available_riders[0]
+        
+        rider_data = {
+            "id": str(selected_rider["rider_id"]),
+            "name": selected_rider["name"],
+            "phone_number": selected_rider["phone_number"],
+            "latitude": selected_rider["latitude"],
+            "longitude": selected_rider["longitude"],
+            "availability_status": selected_rider["availability_status"],
+            "vehicle_type": selected_rider["vehicle_type"],
+            "distance_to_restaurant_km": selected_rider.get("distance_to_restaurant", "Not calculated")
+        }
+        
         rider_coords = [rider_data["latitude"], rider_data["longitude"]]
         
-        # Add rider info to result
+        # Add rider info to result - IMPORTANT: Use phone_number as the id value
         result["data"]["rider"] = {
-            "id": rider_id,
+            "id": rider_data["phone_number"],  # Use phone number as the rider id
             "name": rider_data["name"],
-            "coordinates": rider_coords
+            "phone_number": rider_data["phone_number"],
+            "vehicle_type": rider_data["vehicle_type"],
+            "availability_status": rider_data["availability_status"],
+            "coordinates": rider_coords,
+            "distance_to_restaurant_km": rider_data["distance_to_restaurant_km"]
         }
 
         # 3. Calculate travel time using Google Maps Service
@@ -348,6 +453,7 @@ def get_dynamic_price(restaurant_id, rider_id):
             "code": 500,
             "message": "calculateDynamicPricing.py internal error: " + ex_str
         }), 500
+
 
 
 # Execute this program if it is run as a main script (not by 'import')
