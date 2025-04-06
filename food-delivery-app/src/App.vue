@@ -1,8 +1,12 @@
 <template>
   <div id="app">
-    <Navbar />
+    <!-- Only show Navbar if not hidden in route meta -->
+    <Navbar v-if="!$route.meta || !$route.meta.hideNavbar" />
+    
     <router-view />
-    <Footer />
+    
+    <!-- Only show Footer if not hidden in route meta -->
+    <Footer v-if="!$route.meta || !$route.meta.hideNavbar" />
   </div>
 </template>
 

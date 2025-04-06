@@ -106,19 +106,8 @@
               <p>{{ orderDetails.delivery_details?.address || 'No address provided' }}</p>
             </div>
             
-            <div class="detail-section">
-              <h4>Rider Information</h4>
-              <p><strong>Name:</strong> {{ orderDetails.delivery_details?.rider_name }}</p>
-              <p v-if="orderDetails.delivery_details?.rider_phone">
-                <strong>Phone:</strong> {{ orderDetails.delivery_details?.rider_phone }}
-              </p>
-            </div>
-            
-            <div class="detail-section">
-              <h4>Delivery Estimate</h4>
-              <p><i class="fas fa-clock"></i> {{ orderDetails.delivery_details?.estimated_time || '30-45 minutes' }}</p>
-            </div>
-            
+
+
             <div class="detail-section" v-if="orderDetails.customer_name">
               <h4>Customer Information</h4>
               <p><strong>Name:</strong> {{ orderDetails.customer_name }}</p>
@@ -140,25 +129,6 @@
           <button class="btn btn-secondary" @click="$router.go(-1)">
             <i class="fas fa-arrow-left"></i> Back
           </button>
-          <button class="btn btn-danger" @click="cancelOrder">
-            <i class="fas fa-times"></i> Cancel Order
-          </button>
-          <router-link 
-            :to="{ 
-              name: 'Refund', 
-              params: { id: orderId },
-              query: {
-                transaction_id: orderId,
-                amount: orderDetails.total_price,
-                restaurant_name: orderDetails.restaurant_name,
-                order_date: orderDetails.transaction_date,
-                from_order_page: 'true'
-              }
-            }" 
-            class="btn btn-warning"
-          >
-            <i class="fas fa-undo"></i> Request Refund
-          </router-link>
           <button class="btn btn-primary" @click="reorder">
             <i class="fas fa-redo"></i> Reorder
           </button>
@@ -277,18 +247,10 @@ export default {
     },
     cancelOrder() {
       if (confirm('Are you sure you want to cancel this order?')) {
-        // Instead of making a direct API call, redirect to the refund page with order details
-        this.$router.push({
-          name: 'Refund',
-          params: { id: this.orderId },
-          query: {
-            transaction_id: this.orderId,
-            amount: this.orderDetails.total_price,
-            restaurant_name: this.orderDetails.restaurant_name,
-            order_date: this.orderDetails.transaction_date,
-            from_order_page: 'true'
-          }
-        });
+        // Add direct cancellation logic here instead of redirecting to refund page
+        alert('Your order has been cancelled.');
+        // You may want to update the order status locally or make an API call to cancel
+        this.orderDetails.status = 'Cancelled';
       }
     }
   },

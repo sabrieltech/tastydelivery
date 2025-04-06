@@ -4,10 +4,6 @@ import os
 import requests
 import uuid
 from datetime import datetime
-import time
-import threading
-import json
-from collections import deque
 
 app = Flask(__name__)
 CORS(app)
@@ -21,111 +17,35 @@ customer_URL = os.environ.get('customer_URL') or "http://localhost:5006/customer
 voucher_URL = os.environ.get('voucher_URL') or "http://localhost:5012/voucher"
 stripe_service_URL = os.environ.get('stripe_service_URL') or "http://localhost:5021/payment/stripe"
 restaurant_inventory_URL = os.environ.get('restaurant_inventory_URL') or "http://localhost:5008/restaurant_inventory"
+rider_URL = os.environ.get('rider_URL') or "https://personal-g86bdbq5.outsystemscloud.com/Rider/rest/v1/riders"
 
-# Circuit breaker configuration
-circuit_state = {
-    "notification": {
-        "state": "CLOSED",  # CLOSED, OPEN, HALF-OPEN
-        "failure_count": 0,
-        "last_failure_time": 0,
-        "threshold": 3,       # Number of failures before opening
-        "timeout": 30         # Seconds to wait before trying half-open
-    }
-}
 
-# Queue for storing notifications that failed to send
-pending_notifications = deque(maxlen=500)  # Limit to 500 entries to prevent memory issues
-
-# File for persisting pending notifications if needed
-NOTIFICATION_BACKUP_FILE = "pending_notifications.json"
-
-# Load pending notifications from file if it exists
-try:
-    if os.path.exists(NOTIFICATION_BACKUP_FILE):
-        with open(NOTIFICATION_BACKUP_FILE, 'r') as f:
-            stored_notifications = json.load(f)
-            for notification in stored_notifications:
-                pending_notifications.append(notification)
-        print(f"Loaded {len(pending_notifications)} pending notifications from backup file")
-except Exception as e:
-    print(f"Error loading pending notifications: {str(e)}")
-
-def save_pending_notifications():
-    """Save pending notifications to a file for persistence"""
-    try:
-        with open(NOTIFICATION_BACKUP_FILE, 'w') as f:
-            json.dump(list(pending_notifications), f)
-    except Exception as e:
-        print(f"Error saving pending notifications: {str(e)}")
-
-# Helper function for HTTP requests to other microservices with circuit breaking
-def invoke_http(url, method='GET', json=None, circuit_key=None, **kwargs):
+# Helper function for HTTP requests to other microservices
+def invoke_http(url, method='GET', json=None, **kwargs):
     """
-    A wrapper for requests methods with circuit breaking capabilities.
+    A simple wrapper for requests methods.
     """
     code = 200
     result = {}
     
-    # Check if this is a notification request and if the circuit is open
-    if circuit_key and circuit_key in circuit_state:
-        circuit = circuit_state[circuit_key]
-        
-        # If circuit is OPEN, check if timeout has elapsed to try HALF-OPEN
-        if circuit["state"] == "OPEN":
-            current_time = time.time()
-            if current_time - circuit["last_failure_time"] > circuit["timeout"]:
-                print(f"Circuit for {circuit_key} entering HALF-OPEN state")
-                circuit["state"] = "HALF-OPEN"
-            else:
-                # Circuit is OPEN and timeout hasn't elapsed, fail fast
-                print(f"Circuit for {circuit_key} is OPEN, failing fast")
-                return {
-                    "code": 503,
-                    "message": f"Service {circuit_key} is currently unavailable (circuit open)"
-                }
-    
     try:
         if method.upper() == 'GET':
-            r = requests.get(url, **kwargs, timeout=5)  # Add timeout
+            r = requests.get(url, **kwargs)
         elif method.upper() == 'POST':
-            r = requests.post(url, json=json, **kwargs, timeout=5)  # Add timeout
+            r = requests.post(url, json=json, **kwargs)
         elif method.upper() == 'PUT':
-            r = requests.put(url, json=json, **kwargs, timeout=5)  # Add timeout
+            r = requests.put(url, json=json, **kwargs)
         elif method.upper() == 'DELETE':
-            r = requests.delete(url, **kwargs, timeout=5)  # Add timeout
+            r = requests.delete(url, **kwargs)
         else:
             raise Exception(f"HTTP method '{method}' is not supported.")
         
         code = r.status_code
         
-        # If this was a circuit in HALF-OPEN and request succeeded, close the circuit
-        if circuit_key and circuit_key in circuit_state and circuit_state[circuit_key]["state"] == "HALF-OPEN":
-            circuit_state[circuit_key]["state"] = "CLOSED"
-            circuit_state[circuit_key]["failure_count"] = 0
-            print(f"Circuit for {circuit_key} is now CLOSED")
-        
         try:
             result = r.json() if r.text else {}
         except Exception as e:
             result = {"code": code, "message": r.text}
-            
-    except requests.exceptions.RequestException as e:
-        code = 500
-        result = {
-            "code": code,
-            "message": f"Error in invoking HTTP request: {str(e)}"
-        }
-        
-        # Update circuit state if this is a circuit-protected call
-        if circuit_key and circuit_key in circuit_state:
-            circuit = circuit_state[circuit_key]
-            circuit["failure_count"] += 1
-            circuit["last_failure_time"] = time.time()
-            
-            # If we've reached the threshold, open the circuit
-            if circuit["failure_count"] >= circuit["threshold"]:
-                circuit["state"] = "OPEN"
-                print(f"Circuit for {circuit_key} is now OPEN due to {circuit['failure_count']} failures")
             
     except Exception as e:
         code = 500
@@ -135,44 +55,6 @@ def invoke_http(url, method='GET', json=None, circuit_key=None, **kwargs):
         }
     
     return result
-
-
-# Background task to retry sending notifications
-def notification_retry_worker():
-    """Worker that retries sending notifications from the queue"""
-    while True:
-        if pending_notifications:
-            # Try to process the oldest notification first
-            notification = pending_notifications[0]
-            notification_id = notification.get("notification_id")
-            
-            print(f"Retrying notification {notification_id}")
-            
-            result = invoke_http(
-                f"{notification_URL}/{notification_id}",
-                method='POST',
-                json=notification,
-                circuit_key="notification"
-            )
-            
-            # If successful, remove from queue
-            if result.get("code") in range(200, 300):
-                pending_notifications.popleft()
-                print(f"Successfully processed queued notification {notification_id}")
-                
-                # Save the updated queue
-                save_pending_notifications()
-            else:
-                # Move to the end of the queue to try other notifications
-                pending_notifications.rotate(-1)
-            
-        # Sleep between retry attempts
-        time.sleep(5)
-
-
-# Start the notification retry worker thread
-retry_thread = threading.Thread(target=notification_retry_worker, daemon=True)
-retry_thread.start()
 
 
 @app.route('/process_payment', methods=['POST'])
@@ -226,9 +108,10 @@ def process_payment():
         restaurant_id = list(restaurant_ids)[0]
         restaurant_name = list(restaurant_names)[0]
         
-        rider_id = "RIDER001"  # Placeholder; should be assigned dynamically
+        # Use "auto" to select the closest available rider automatically
+        rider_id = "auto"
         
-        # Calculate delivery fee using dynamic pricing service
+        # Calculate delivery fee using dynamic pricing service with "auto" rider selection
         pricing_result = invoke_http(f"{dynamic_pricing_URL}/{restaurant_id}/{rider_id}", method='GET')
         
         if pricing_result["code"] not in range(200, 300):
@@ -238,6 +121,9 @@ def process_payment():
             }), pricing_result["code"]
         
         delivery_fee = pricing_result["data"]["delivery_fee"]
+        
+        # Get the rider information from the pricing result
+        rider_info = pricing_result["data"]["rider"]
         
         # Calculate loyalty discount
         loyalty_discount_percentage = 0
@@ -293,7 +179,7 @@ def process_payment():
         # Calculate loyalty points to add (1 point per dollar spent)
         loyalty_points_added = int(total_price)
         
-        # NEW: Create a transaction record
+        # Create a transaction record - Store the rider's phone_number instead of rider_id
         transaction_id = f"TRANS{uuid.uuid4().hex[:8].upper()}"
         transaction_data = {
             "transaction_id": transaction_id,
@@ -307,7 +193,13 @@ def process_payment():
             "current_loyalty_status": loyalty_status,
             "status": "Pending",
             "voucher_id": voucher_id if voucher_id else None,
-            "rider_id": rider_id
+            "rider_phone": rider_info["phone_number"],  # Store rider's phone number as a reference
+            "rider_info": {  # Store additional rider information as JSON
+                "name": rider_info["name"],
+                "phone_number": rider_info["phone_number"],
+                "vehicle_type": rider_info.get("vehicle_type", ""),
+                "availability_status": rider_info.get("availability_status", "")
+            }
         }
         
         # Create the transaction
@@ -326,7 +218,32 @@ def process_payment():
         
         print("Transaction created:", transaction_result)
         
-        # NEW: Create transaction items
+        # Assign this order to the selected rider in OutSystems
+        rider_assignment_data = {
+            "phone_number": rider_info["phone_number"],
+            "order_id": order_id,
+            "restaurant_id": restaurant_id,
+            "restaurant_name": restaurant_name,
+            "delivery_address": data.get("delivery_address", "Not provided"),
+            "customer_id": customer_id,
+            "status": "Assigned"
+        }
+        
+        # Call the OutSystems API to assign the order to the rider
+        # Note: You'll need to implement the appropriate endpoint in OutSystems
+        rider_assignment_url = f"{rider_URL}/assign_order"
+        try:
+            assignment_result = invoke_http(
+                rider_assignment_url,
+                method='POST',
+                json=rider_assignment_data
+            )
+            print("Rider assignment result:", assignment_result)
+        except Exception as e:
+            print(f"Warning: Failed to assign order to rider in OutSystems: {str(e)}")
+            # Continue with payment process even if rider assignment fails
+        
+        # Create transaction items
         # Prepare items for batch creation
         batch_items = []
         for item in cart_items:
@@ -413,7 +330,8 @@ def process_payment():
             "delivery_fee": float(delivery_fee),
             "loyalty_discount": float(loyalty_discount_amount),
             "voucher_discount": float(voucher_discount),
-            "total_price": float(total_price)
+            "total_price": float(total_price),
+            "rider_info": rider_info  # Include rider info in the response
         }
         
         # Return the checkout URL, order ID, transaction ID, and order summary
@@ -489,6 +407,27 @@ def payment_success():
         
         transaction_data = transaction_details["data"]
         
+        # Update order status in OutSystems rider service
+        if "rider_phone" in transaction_data:
+            rider_phone = transaction_data["rider_phone"]
+            try:
+                # Call OutSystems API to update order status to "Processing"
+                update_order_status_url = f"{rider_URL}/update_order_status"
+                update_order_data = {
+                    "phone_number": rider_phone,
+                    "order_id": order_id,
+                    "status": "Processing"
+                }
+                order_update_result = invoke_http(
+                    update_order_status_url,
+                    method='POST',
+                    json=update_order_data
+                )
+                print("Order status update result:", order_update_result)
+            except Exception as e:
+                print(f"Warning: Failed to update order status in OutSystems: {str(e)}")
+                # Continue processing even if this fails
+        
         # Get transaction items
         transaction_items = invoke_http(
             f"{transaction_item_URL}/transaction/{transaction_id}", 
@@ -550,21 +489,16 @@ def payment_success():
             "status": "Unread"
         }
         
-        # Try to send notification with circuit breaker pattern
         notification_result = invoke_http(
             f"{notification_URL}/{notification_id}",
             method='POST',
-            json=notification_data,
-            circuit_key="notification"
+            json=notification_data
         )
         
-        # If notification service is down or returns an error, queue it for later processing
         if notification_result["code"] not in range(200, 300):
-            print(f"Notification service unavailable, queuing notification: {notification_id}")
-            pending_notifications.append(notification_data)
-            save_pending_notifications()
+            print(f"Failed to create notification: {notification_result}")
         
-        # Prepare the response - we continue with the process regardless of notification status
+        # Prepare the response
         return jsonify({
             "code": 200,
             "data": {
@@ -576,8 +510,7 @@ def payment_success():
                     "points_used": transaction_data.get("loyalty_points_used", 0),
                     "new_total_points": current_loyalty_points,
                     "status": transaction_data["current_loyalty_status"]
-                },
-                "notification_status": "queued" if notification_result["code"] not in range(200, 300) else "sent"
+                }
             }
         }), 200
         
@@ -636,44 +569,6 @@ def stripe_webhook():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-
-
-# Endpoint to check circuit status
-@app.route('/circuit_status', methods=['GET'])
-def get_circuit_status():
-    return jsonify({
-        "code": 200,
-        "data": {
-            "circuits": circuit_state,
-            "pending_notifications": len(pending_notifications)
-        }
-    })
-
-
-# Endpoint to manually reset a circuit
-@app.route('/reset_circuit/<string:circuit_key>', methods=['POST'])
-def reset_circuit(circuit_key):
-    if circuit_key in circuit_state:
-        circuit_state[circuit_key]["state"] = "CLOSED"
-        circuit_state[circuit_key]["failure_count"] = 0
-        return jsonify({
-            "code": 200,
-            "message": f"Circuit {circuit_key} has been reset to CLOSED"
-        })
-    else:
-        return jsonify({
-            "code": 404,
-            "message": f"Circuit {circuit_key} not found"
-        }), 404
-
-
-# Graceful shutdown - save any pending notifications
-import atexit
-
-def on_exit():
-    save_pending_notifications()
-
-atexit.register(on_exit)
 
 
 if __name__ == "__main__":

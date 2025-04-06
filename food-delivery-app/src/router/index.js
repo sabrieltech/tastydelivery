@@ -12,6 +12,7 @@ import CartPage from '@/views/CartPage.vue'
 import OrderSuccess from '@/views/OrderSuccess.vue'
 import OrderPage from '@/views/Orderpage.vue'
 import RefundPage from '@/views/RefundPage.vue'
+import Restaurant from '@/views/Restaurant.vue'
 
 Vue.use(VueRouter)
 
@@ -22,6 +23,21 @@ const requireAuth = (to, from, next) => {
     next()
   } else {
     next('/login')
+  }
+}
+
+// Navigation guard for restaurant staff
+// eslint-disable-next-line no-unused-vars
+const requireRestaurantAuth = (to, from, next) => {
+  // In a real app, you would check for restaurant staff credentials
+  // For this example, we'll use a simple flag in localStorage
+  const isRestaurantStaff = localStorage.getItem('isRestaurantStaff') === 'true'
+  if (isRestaurantStaff) {
+    next()
+  } else {
+    // Redirect to restaurant login page (you would need to create this)
+    // For now, we'll redirect to the main login page
+    next('/restaurant/login')
   }
 }
 
@@ -102,6 +118,26 @@ const routes = [
     component: RefundPage,
     beforeEnter: requireAuth,
     props: true
+  },
+  
+  // Restaurant Dashboard route - outside of customer app
+  {
+    path: '/restaurant-dashboard',
+    name: 'RestaurantDashboard',
+    component: Restaurant,
+    meta: { 
+      layout: 'restaurant', // Optional: Use this if you want to create a specific layout
+      hideNavbar: true // Use this flag to hide the navbar
+    }
+    // Uncomment the next line to enable authentication once you have a restaurant login
+    // beforeEnter: requireRestaurantAuth
+  },
+  
+  {
+    path: '/restaurant/login',
+    name: 'RestaurantLogin',
+    component: () => import('../views/RestaurantLogin.vue'),
+    meta: { hideNavbar: true }
   }
 ]
 

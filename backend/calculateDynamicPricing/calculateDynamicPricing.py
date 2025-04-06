@@ -7,6 +7,7 @@ import requests
 import subprocess
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
+from math import sin, cos, sqrt, asin  # Added import at the top level
 
 app = Flask(__name__)
 CORS(app)
@@ -252,6 +253,29 @@ def getStaticMapImageUrl(restaurant_coords, rider_coords):
         print(f"Error generating static map image URL: {str(e)}")
         return None
 
+
+# Helper function to calculate Haversine distance between two points
+def calculate_distance(lat1, lon1, lat2, lon2):
+    """
+    Calculate the Haversine distance between two points
+    specified by their latitude and longitude in degrees.
+    Returns distance in kilometers.
+    """
+    # Convert latitude and longitude from degrees to radians
+    lat1 = float(lat1) * (3.14159 / 180.0)
+    lon1 = float(lon1) * (3.14159 / 180.0)
+    lat2 = float(lat2) * (3.14159 / 180.0)
+    lon2 = float(lon2) * (3.14159 / 180.0)
+    
+    # Haversine formula
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = pow(sin(dlat/2), 2) + cos(lat1) * cos(lat2) * pow(sin(dlon/2), 2)
+    c = 2 * asin(sqrt(a))
+    r = 6371  # Radius of Earth in kilometers
+    return c * r
+
+
 @app.route("/calculate_delivery_fee/<string:restaurant_id>/<string:phone_number>", methods=['GET'])
 def get_dynamic_price(restaurant_id, phone_number):
     """
@@ -307,27 +331,6 @@ def get_dynamic_price(restaurant_id, phone_number):
                 "message": "Failed to get rider information"
             }), 400
         
-        # Helper function to calculate Haversine distance between two points
-        def calculate_distance(lat1, lon1, lat2, lon2):
-            """
-            Calculate the Haversine distance between two points
-            specified by their latitude and longitude in degrees.
-            Returns distance in kilometers.
-            """
-            # Convert latitude and longitude from degrees to radians
-            lat1 = float(lat1) * (3.14159 / 180.0)
-            lon1 = float(lon1) * (3.14159 / 180.0)
-            lat2 = float(lat2) * (3.14159 / 180.0)
-            lon2 = float(lon2) * (3.14159 / 180.0)
-            
-            # Haversine formula
-            dlon = lon2 - lon1
-            dlat = lat2 - lat1
-            a = pow(sin(dlat/2), 2) + cos(lat1) * cos(lat2) * pow(sin(dlon/2), 2)
-            c = 2 * asin(sqrt(a))
-            r = 6371  # Radius of Earth in kilometers
-            return c * r
-        
         # Get all available riders
         available_riders = [rider for rider in rider_result["Riders"] if rider["availability_status"] == "Available"]
         
@@ -352,9 +355,6 @@ def get_dynamic_price(restaurant_id, phone_number):
                     }), 400
             else:
                 # If specified rider not found, find the closest available rider
-                # First, import necessary math functions if not already at the top of the file
-                from math import sin, cos, sqrt, asin
-                
                 # Calculate distance from restaurant to each available rider
                 for rider in available_riders:
                     rider["distance_to_restaurant"] = calculate_distance(
@@ -372,9 +372,6 @@ def get_dynamic_price(restaurant_id, phone_number):
                 print(f"Rider with phone number {phone_number} not found or not available. Using closest available rider instead.")
         else:
             # Auto mode - find the closest available rider
-            # First, import necessary math functions if not already at the top of the file
-            from math import sin, cos, sqrt, asin
-            
             # Calculate distance from restaurant to each available rider
             for rider in available_riders:
                 rider["distance_to_restaurant"] = calculate_distance(
@@ -453,7 +450,6 @@ def get_dynamic_price(restaurant_id, phone_number):
             "code": 500,
             "message": "calculateDynamicPricing.py internal error: " + ex_str
         }), 500
-
 
 
 # Execute this program if it is run as a main script (not by 'import')

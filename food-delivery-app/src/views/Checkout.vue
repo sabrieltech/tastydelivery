@@ -134,10 +134,24 @@
             </div>
 
             <div v-if="deliveryInfo.rider" class="info-section">
-              <h3>Rider</h3>
+              <h3>Your Rider</h3>
               <p class="info-item">
                 <i class="fas fa-user info-icon"></i>
                 <span>{{ deliveryInfo.rider.name }}</span>
+              </p>
+              <p v-if="deliveryInfo.rider.phone_number" class="info-item">
+                <i class="fas fa-phone info-icon"></i>
+                <span>{{ deliveryInfo.rider.phone_number }}</span>
+              </p>
+              <p v-if="deliveryInfo.rider.vehicle_type" class="info-item">
+                <i class="fas fa-motorcycle info-icon"></i>
+                <span>Vehicle: {{ deliveryInfo.rider.vehicle_type }}</span>
+              </p>
+              <p v-if="deliveryInfo.rider.distance_to_restaurant_km" class="info-item">
+                <i class="fas fa-map-marker-alt info-icon"></i>
+                <span>Currently {{ typeof deliveryInfo.rider.distance_to_restaurant_km === 'number' ? 
+                  deliveryInfo.rider.distance_to_restaurant_km.toFixed(1) + ' km' : 
+                  deliveryInfo.rider.distance_to_restaurant_km }} from restaurant</span>
               </p>
             </div>
 
@@ -338,11 +352,11 @@ export default {
           throw new Error('No items in cart');
         }
         
-        // In a real scenario, the rider would be assigned by the system
-        const riderId = 'RIDER001';
+        // Use "auto" parameter to get the closest available rider
+        const autoAssignRider = "auto";
         
-        // Call the dynamic pricing microservice
-        const response = await fetch(`http://localhost:5016/calculate_delivery_fee/${restaurantId}/${riderId}`);
+        // Call the dynamic pricing microservice with "auto" to get closest rider
+        const response = await fetch(`http://localhost:5016/calculate_delivery_fee/${restaurantId}/${autoAssignRider}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch delivery information');
