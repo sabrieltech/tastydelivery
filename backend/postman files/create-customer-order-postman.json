@@ -1,0 +1,35 @@
+{
+  "info": {
+    "_postman_id": "e7b5f91e-9c7d-44dc-a758-8f89c7e22300",
+    "name": "Customer Order Service",
+    "description": "Postman collection for retrieving customer order details via the createCustomerOrder composite service.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Customer Order Details",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/order/{{transaction_id}}?mark_notifications=false",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "order",
+            "{{transaction_id}}"
+          ],
+          "query": [
+            {
+              "key": "mark_notifications",
+              "value": "false"
+            }
+          ]
+        },
+        "description": "Fetch full order details including transaction, customer, items, restaurant, voucher, and rider info. Add `?mark_notifications=true` to mark notifications as read."
+      },
+      "response": []
+    }
+  ]
+}

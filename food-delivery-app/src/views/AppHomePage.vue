@@ -134,7 +134,9 @@
         <div class="notification-list">
           <div v-for="notification in displayedNotifications" 
                :key="notification.notification_id || notification.id" 
-               class="notification-card">
+               class="notification-card"
+               @click="viewNotification(notification)"
+               :class="{'clickable': canViewDetails(notification)}">
             <div class="notification-icon" :class="notification.type || getNotificationType(notification.message_type)">
               <i :class="getNotificationIcon(notification.type || getNotificationType(notification.message_type))"></i>
             </div>
@@ -581,6 +583,21 @@ export default {
     },
     loadMoreNotifications() {
       this.displayedNotificationsCount = this.notifications.length;
+    },
+    canViewDetails(notification) {
+      // Check if notification has a transaction_id and is related to an order
+      return notification.transaction_id && 
+        (notification.message_type === 'Payment_Success' || 
+         notification.message_type === 'Order_Delivered');
+    },
+    
+    viewNotification(notification) {
+      if (this.canViewDetails(notification)) {
+        this.$router.push({ 
+          name: 'OrderDetail', 
+          params: { id: notification.transaction_id } 
+        });
+      }
     }
   },
   async mounted() {
@@ -1038,6 +1055,16 @@ export default {
 .notification-time {
   font-size: 0.8rem;
   color: #999;
+}
+
+.notification-card.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notification-card.clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 @media (max-width: 768px) {

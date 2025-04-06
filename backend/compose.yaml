@@ -246,3 +246,37 @@ services:
       - voucher
       - stripeService
       - restaurant_inventory
+
+  ###################################
+  # Create Customer Order: The order details microservice
+  ###################################
+  ###################################
+  # Order Details: The order details orchestration service
+  ###################################
+  createCustomerOrder:
+    build:
+      context: ./createCustomerOrder/
+      dockerfile: createCustomerOrder.Dockerfile
+    image: fooddelivery/customer_order:latest
+    restart: always
+    environment:
+      transaction_URL: "http://transaction:5009/transaction"
+      transaction_item_URL: "http://transaction_item:5010/transaction_item"
+      restaurant_URL: "http://restaurant:5007/restaurant"
+      restaurant_inventory_URL: "http://restaurant_inventory:5008/restaurant_inventory"
+      customer_URL: "http://customer:5006/customer"
+      rider_URL: "http://rider:5015/rider"
+      voucher_URL: "http://voucher:5012/voucher"
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5014:5014"
+    networks:
+      - fooddelivery-net
+    depends_on:
+      - transaction
+      - transaction_item
+      - restaurant
+      - restaurant_inventory
+      - customer
+      - rider
+      - voucher

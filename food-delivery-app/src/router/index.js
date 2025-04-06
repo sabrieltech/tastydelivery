@@ -10,7 +10,7 @@ import LoginPage from '@/views/LoginPage.vue'
 import AppHomePage from '@/views/AppHomePage.vue'
 import CartPage from '@/views/CartPage.vue'
 import OrderSuccess from '@/views/OrderSuccess.vue'
-
+import OrderPage from '@/views/Orderpage.vue'
 
 Vue.use(VueRouter)
 
@@ -88,8 +88,13 @@ const routes = [
     name: 'OrderSuccess',
     component: OrderSuccess,
     beforeEnter: requireAuth
+  },
+  {
+    path: '/app/order/:id',
+    name: 'OrderDetail',
+    component: OrderPage,
+    beforeEnter: requireAuth
   }
-  
 ]
 
 const router = new VueRouter({
