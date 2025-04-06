@@ -32,13 +32,14 @@ class Transaction(db.Model):
     status = db.Column(db.Enum('Pending', 'Submitted', 'Paid', 'Refunded', 'Cancelled'), nullable=False, default='Pending')
     voucher_id = db.Column(db.String(32), nullable=True)
     rider_id = db.Column(db.String(32), nullable=True)
+    stripe_session_id = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now)
     updated_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now, onupdate=datetime.now)
 
     def __init__(self, transaction_id, customer_id, food_cost, delivery_cost, 
                 loyalty_discount_percentage, total_price_after_discount, 
                 loyalty_points_added, current_loyalty_points, current_loyalty_status, 
-                status='Pending', voucher_id=None, rider_id=None):
+                status='Pending', voucher_id=None, rider_id=None, stripe_session_id=None):
         self.transaction_id = transaction_id
         self.customer_id = customer_id
         self.food_cost = food_cost
@@ -51,6 +52,7 @@ class Transaction(db.Model):
         self.status = status
         self.voucher_id = voucher_id
         self.rider_id = rider_id
+        self.stripe_session_id = stripe_session_id
 
     def json(self):
         return {
@@ -66,6 +68,7 @@ class Transaction(db.Model):
             "status": self.status,
             "voucher_id": self.voucher_id,
             "rider_id": self.rider_id,
+            "stripe_session_id": self.stripe_session_id,
             "created_at": self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             "updated_at": self.updated_at.strftime('%Y-%m-%d %H:%M:%S')
         }
@@ -166,7 +169,8 @@ def create_transaction():
         current_loyalty_status=data["current_loyalty_status"],
         status=data.get("status", "Pending"),
         voucher_id=data.get("voucher_id"),
-        rider_id=data.get("rider_id")
+        rider_id=data.get("rider_id"),
+        stripe_session_id=data.get("stripe_session_id")
     )
 
     try:

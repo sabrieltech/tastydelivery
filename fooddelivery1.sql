@@ -388,6 +388,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `status` ENUM('Pending', 'Submitted', 'Paid', 'Refunded', 'Cancelled') NOT NULL DEFAULT 'Pending',
   `voucher_id` VARCHAR(32) DEFAULT NULL,
   `rider_id` VARCHAR(32) DEFAULT NULL,
+  `stripe_session_id` VARCHAR(255) DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`transaction_id`)

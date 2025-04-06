@@ -83,16 +83,6 @@
           </div>
         </div>
         
-        <div class="delivery-info" v-if="deliveryEstimate">
-          <h3>Delivery Information</h3>
-          <p class="info-text">
-            <i class="fas fa-clock"></i> Estimated delivery time: <strong>{{ deliveryEstimate }}</strong>
-          </p>
-          <p class="info-text">
-            <i class="fas fa-bell"></i> You'll receive notifications with updates about your order.
-          </p>
-        </div>
-        
         <div class="action-buttons">
           <router-link to="/app/home" class="btn btn-primary">
             <i class="fas fa-home"></i> Go to Home

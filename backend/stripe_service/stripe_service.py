@@ -89,7 +89,7 @@ def process_stripe_payment():
     product_description = f"Food order from {restaurant_name}"
     
     try:
-        checkout_url = create_stripe_checkout_session(
+        checkout_url, session_id = create_stripe_checkout_session(
             product_description, 
             total_amount, 
             order_id,
@@ -100,7 +100,7 @@ def process_stripe_payment():
             delivery_fee,
             loyalty_points_used
         )
-        return jsonify({"url": checkout_url})
+        return jsonify({"url": checkout_url, "id": session_id})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -147,9 +147,40 @@ def create_stripe_checkout_session(
                 "loyalty_points_used": str(loyalty_points_used)
             }
         )
-        return checkout_session.url
+        return checkout_session.url, checkout_session.id
     except Exception as e:
         raise Exception(f"Stripe Checkout Session creation failed: {str(e)}")
+
+@app.route('/payment/refund', methods=["POST"])
+@cross_origin()
+def process_refund():
+    data = request.json
+    session_id = data.get('session_id')  # Changed to session_id
+    amount = data.get('amount')  # Amount to refund in dollars
+
+    try:
+        # Retrieve checkout session
+        checkout_session = stripe.checkout.Session.retrieve(session_id)
+        payment_intent_id = checkout_session.payment_intent
+
+        refund = create_stripe_refund(payment_intent_id, amount)
+        return jsonify({"refund_id": refund.id, "status": refund.status})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def create_stripe_refund(payment_intent_id, amount, currency='sgd'):
+    stripe.api_key = stripe_keys["secret_key"]
+    try:
+        # Stripe requires amount in cents
+        amount_in_cents = int(amount * 100)
+        refund = stripe.Refund.create(
+            payment_intent=payment_intent_id,
+            amount=amount_in_cents,
+            currency=currency
+        )
+        return refund
+    except Exception as e:
+        raise Exception(f"Stripe Refund creation failed: {str(e)}")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5021, debug=True)

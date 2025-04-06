@@ -78,6 +78,9 @@ def process_payment():
         voucher_id = data.get("voucher_id")
         voucher_code = data.get("voucher_code")
         
+        # Get loyalty points used (if any)
+        loyalty_points_used = data.get("loyalty_points_used", 0)
+        
         # Get customer info (for loyalty status)
         customer_result = invoke_http(f"{customer_URL}/{customer_id}", method='GET')
         
@@ -151,7 +154,12 @@ def process_payment():
         subtotal = food_cost
         total_without_discount = food_cost + delivery_fee
         loyalty_discount_amount = total_without_discount * (loyalty_discount_percentage / 100)
-        total_discount = loyalty_discount_amount + voucher_discount
+        
+        # Calculate loyalty points discount (each point is worth $0.10)
+        loyalty_points_discount = loyalty_points_used * 0.1
+        
+        # Include loyalty points discount in total discount calculation
+        total_discount = loyalty_discount_amount + voucher_discount + loyalty_points_discount
         total_price = total_without_discount - total_discount
         
         # Round to 2 decimal places for currency
@@ -265,6 +273,20 @@ def process_payment():
                 "code": 500,
                 "message": "Failed to create Stripe checkout session"
             }), 500
+        
+        # Extract session_id from the stripe response
+        session_id = stripe_result.get("id")
+        
+        # Update transaction record with session_id if available
+        if session_id:
+            update_transaction = invoke_http(
+                f"{transaction_URL}/{transaction_id}",
+                method='PUT',
+                json={"stripe_session_id": session_id}
+            )
+            
+            if update_transaction["code"] not in range(200, 300):
+                print(f"Warning: Failed to update transaction with Stripe session ID: {update_transaction}")
         
         # Prepare the order summary for the client
         order_summary = {
@@ -456,7 +478,7 @@ def stripe_webhook():
         event_data = request.get_json()
         event_type = event_data.get('type')
         
-        if event_type == 'checkout.session.completed':
+        if (event_type == 'checkout.session.completed'):
             session = event_data['data']['object']
             
             # Extract order details from metadata
