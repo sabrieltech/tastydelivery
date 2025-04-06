@@ -11,6 +11,7 @@ import AppHomePage from '@/views/AppHomePage.vue'
 import CartPage from '@/views/CartPage.vue'
 import OrderSuccess from '@/views/OrderSuccess.vue'
 import OrderPage from '@/views/Orderpage.vue'
+import RefundPage from '@/views/RefundPage.vue'
 
 Vue.use(VueRouter)
 
@@ -94,6 +95,13 @@ const routes = [
     name: 'OrderDetail',
     component: OrderPage,
     beforeEnter: requireAuth
+  },
+  {
+    path: '/app/refund/:id?',
+    name: 'Refund',
+    component: RefundPage,
+    beforeEnter: requireAuth,
+    props: true
   }
 ]
 

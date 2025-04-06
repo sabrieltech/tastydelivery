@@ -2,6 +2,7 @@ import stripe
 import math
 from flask import Flask, request, jsonify, render_template
 from flask_cors import cross_origin
+from decimal import Decimal, ROUND_HALF_UP
 
 app = Flask(__name__)
 
@@ -79,9 +80,16 @@ def process_stripe_payment():
     discount_amount = data.get('discount_amount', 0)
     loyalty_points_used = data.get('loyalty_points_used', 0)
     
-    # Calculate total amount in cents (Stripe requires amounts in smallest currency unit)
-    # The discount_amount should already include any loyalty point discounts
-    total_amount = math.ceil((subtotal + delivery_fee - discount_amount) * 100)
+    # Calculate total amount
+    # Convert all values to Decimal for precise calculation
+    total = Decimal(str(subtotal)) + Decimal(str(delivery_fee)) - Decimal(str(discount_amount))
+    
+    # Round to 2 decimal places using ROUND_HALF_UP
+    # This ensures exact same rounding as in calculateDynamicPricing.py
+    total = total.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    
+    # Convert to cents for Stripe (after rounding)
+    total_amount = int(total * 100)
     
     # Create product description
     product_description = f"Food order from {restaurant_name}"
@@ -169,12 +177,16 @@ def process_refund():
 def create_stripe_refund(payment_intent_id, amount, currency='sgd'):
     stripe.api_key = stripe_keys["secret_key"]
     try:
-        # Stripe requires amount in cents
-        amount_in_cents = math.ceil(amount * 100)
+        # Convert amount to Decimal for precise rounding
+        amount_decimal = Decimal(str(amount))
+        # Round to 2 decimal places using ROUND_HALF_UP
+        amount_decimal = amount_decimal.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        # Convert to cents for Stripe
+        amount_in_cents = int(amount_decimal * 100)
+        
         refund = stripe.Refund.create(
             payment_intent=payment_intent_id,
-            amount=amount_in_cents,
-            currency=currency
+            amount=amount_in_cents
         )
         return refund
     except Exception as e:

@@ -6,6 +6,7 @@ import json
 import requests
 import subprocess
 from datetime import datetime
+from decimal import Decimal, ROUND_HALF_UP
 
 app = Flask(__name__)
 CORS(app)
@@ -178,11 +179,11 @@ def calculate_price(travel_time_data):
     - Peak hour multiplier: 1.5x during peak hours (not implemented yet)
     """
     # Base fare
-    base_fare = 2.50
+    base_fare = Decimal('2.50')
     
     # Time component
     minutes = travel_time_data["minutes"]
-    time_charge = minutes * 0.30
+    time_charge = Decimal(str(minutes)) * Decimal('0.30')
     
     # Distance component
     distance_text = travel_time_data["distance"]
@@ -197,24 +198,24 @@ def calculate_price(travel_time_data):
     
     # Apply distance surcharge
     if distance_km <= 3:
-        distance_surcharge = 0
+        distance_surcharge = Decimal('0')
     elif distance_km <= 10:
-        distance_surcharge = 1.50
+        distance_surcharge = Decimal('1.50')
     else:
-        distance_surcharge = 3.00
+        distance_surcharge = Decimal('3.00')
     
     # Calculate total price
     total_price = base_fare + time_charge + distance_surcharge
     
-    # Round to 2 decimal places
-    total_price = round(total_price, 2)
+    # Round to 2 decimal places using ROUND_HALF_UP
+    total_price = total_price.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     
     return {
-        "base_fare": base_fare,
-        "time_charge": time_charge,
+        "base_fare": float(base_fare),
+        "time_charge": float(time_charge),
         "distance_km": distance_km,
-        "distance_surcharge": distance_surcharge,
-        "total_price": total_price
+        "distance_surcharge": float(distance_surcharge),
+        "total_price": float(total_price)
     }
 
 

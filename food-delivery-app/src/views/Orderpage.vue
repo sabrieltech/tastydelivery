@@ -143,6 +143,22 @@
           <button class="btn btn-danger" @click="cancelOrder">
             <i class="fas fa-times"></i> Cancel Order
           </button>
+          <router-link 
+            :to="{ 
+              name: 'Refund', 
+              params: { id: orderId },
+              query: {
+                transaction_id: orderId,
+                amount: orderDetails.total_price,
+                restaurant_name: orderDetails.restaurant_name,
+                order_date: orderDetails.transaction_date,
+                from_order_page: 'true'
+              }
+            }" 
+            class="btn btn-warning"
+          >
+            <i class="fas fa-undo"></i> Request Refund
+          </router-link>
           <button class="btn btn-primary" @click="reorder">
             <i class="fas fa-redo"></i> Reorder
           </button>
@@ -261,20 +277,17 @@ export default {
     },
     cancelOrder() {
       if (confirm('Are you sure you want to cancel this order?')) {
-        fetch(`http://localhost:5014/createCustomerRefund.py?order_id=${this.orderId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        // Instead of making a direct API call, redirect to the refund page with order details
+        this.$router.push({
+          name: 'Refund',
+          params: { id: this.orderId },
+          query: {
+            transaction_id: this.orderId,
+            amount: this.orderDetails.total_price,
+            restaurant_name: this.orderDetails.restaurant_name,
+            order_date: this.orderDetails.transaction_date,
+            from_order_page: 'true'
           }
-        })
-        .then(response => response.json())
-        .then(() => {  // Removed parameter completely since we don't use it
-          alert('Order has been cancelled and refund initiated');
-          this.fetchOrderDetails(); // Refresh the order details
-        })
-        .catch(error => {
-          console.error('Error cancelling order:', error);
-          alert('Failed to cancel order. Please try again.');
         });
       }
     }

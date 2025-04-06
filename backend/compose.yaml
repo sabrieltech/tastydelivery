@@ -280,3 +280,34 @@ services:
       - customer
       - rider
       - voucher
+
+  ###################################
+  # Process Customer Refund: The customer refund orchestration service
+  ###################################
+  processCustomerRefund:
+    build:
+      context: ./processCustomerRefund/
+      dockerfile: processCustomerRefund.Dockerfile
+    image: fooddelivery/process_refund:latest
+    restart: always
+    environment:
+      transaction_URL: "http://transaction:5009/transaction"
+      transaction_item_URL: "http://transaction_item:5010/transaction_item"
+      notification_URL: "http://notification:5011/notification"
+      customer_URL: "http://customer:5006/customer"
+      voucher_URL: "http://voucher:5012/voucher"
+      stripe_service_URL: "http://stripeService:5021/payment/refund"
+      restaurant_inventory_URL: "http://restaurant_inventory:5008/restaurant_inventory"
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5022:5022"
+    networks:
+      - fooddelivery-net
+    depends_on:
+      - transaction
+      - transaction_item
+      - notification
+      - customer
+      - voucher
+      - stripeService
+      - restaurant_inventory
