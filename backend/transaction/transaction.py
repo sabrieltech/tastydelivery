@@ -29,7 +29,7 @@ class Transaction(db.Model):
     loyalty_points_added = db.Column(db.Integer, nullable=False, default=0)
     current_loyalty_points = db.Column(db.Integer, nullable=False, default=0)
     current_loyalty_status = db.Column(db.Enum('Bronze', 'Silver', 'Gold'), nullable=False, default='Bronze')
-    status = db.Column(db.Enum('Pending', 'Submitted', 'Paid', 'Refunded', 'Cancelled'), nullable=False, default='Pending')
+    status = db.Column(db.Enum('Pending', 'Submitted', 'Paid', 'Refunded', 'Cancelled', 'Delivered'), nullable=False, default='Pending')
     voucher_id = db.Column(db.String(32), nullable=True)
     rider_id = db.Column(db.String(32), nullable=True)
     stripe_session_id = db.Column(db.String(255), nullable=True)
@@ -112,7 +112,7 @@ def find_by_customer_id(customer_id):
 @app.route("/transaction/status/<string:status>")
 def find_by_status(status):
     # Validate the status value
-    valid_statuses = ['Pending', 'Submitted', 'Paid', 'Refunded', 'Cancelled']
+    valid_statuses = ['Pending', 'Submitted', 'Paid', 'Refunded', 'Cancelled', 'Delivered']
     if status not in valid_statuses:
         return jsonify({
             "code": 400,
@@ -267,7 +267,7 @@ def update_status(transaction_id):
         )
 
     # Validate the status value
-    valid_statuses = ['Pending', 'Submitted', 'Paid', 'Refunded', 'Cancelled']
+    valid_statuses = ['Pending', 'Submitted', 'Paid', 'Refunded', 'Cancelled', 'Delivered']
     if data['status'] not in valid_statuses:
         return jsonify({
             "code": 400,

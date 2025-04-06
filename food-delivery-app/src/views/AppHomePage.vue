@@ -253,6 +253,8 @@ export default {
       switch(messageType) {
         case 'Payment_Success':
           return 'payment';
+        case 'Order_Delivered':
+          return 'delivered';
         case 'Refund_Processed':
           return 'refund';
         case 'Loyalty_Updated':
@@ -265,8 +267,10 @@ export default {
       switch(messageType) {
         case 'Payment_Success':
           return 'Payment Successful';
+        case 'Order_Delivered':
+          return 'Delivered';
         case 'Refund_Processed':
-          return 'Refund Processed';
+          return 'Refunded';
         case 'Loyalty_Updated':
           return 'Loyalty Status Updated';
         default:
@@ -286,6 +290,8 @@ export default {
           }
           return `Your payment was successful`;
         }
+        case 'Order_Delivered':
+          return 'Your order has been delivered successfully';
         case 'Refund_Processed':
           return 'Your refund has been processed successfully';
         case 'Loyalty_Updated':
@@ -1000,7 +1006,17 @@ export default {
   color: #4CAF50;
 }
 
-.notification-icon.order, .notification-icon.payment {
+.notification-icon.payment {
+  background-color: #E3F2FD;
+  color: #2196F3;
+}
+
+.notification-icon.delivered {
+  background-color: #E8F5E9;
+  color: #4CAF50;
+}
+
+.notification-icon.order {
   background-color: #E3F2FD;
   color: #2196F3;
 }

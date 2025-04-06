@@ -22,7 +22,7 @@ class Notification(db.Model):
 
     notification_id = db.Column(db.String(32), primary_key=True)
     customer_id = db.Column(db.String(32), nullable=False)
-    message_type = db.Column(db.Enum('Payment_Success', 'Refund_Processed', 'Loyalty_Updated'), nullable=False)
+    message_type = db.Column(db.Enum('Payment_Success', 'Refund_Processed', 'Loyalty_Updated', 'Order_Delivered'), nullable=False)
     transaction_id = db.Column(db.String(32), nullable=True)
     voucher_id = db.Column(db.String(32), nullable=True)
     loyalty_points = db.Column(db.Integer, nullable=True)
@@ -127,7 +127,7 @@ def create_notification(notification_id):
             return jsonify({"code": 400, "message": f"Field '{field}' is required."}), 400
     
     # Validate message_type
-    valid_message_types = ['Payment_Success', 'Refund_Processed', 'Loyalty_Updated']
+    valid_message_types = ['Payment_Success', 'Refund_Processed', 'Loyalty_Updated', 'Order_Delivered']
     if data['message_type'] not in valid_message_types:
         return jsonify({
             "code": 400,
@@ -278,6 +278,10 @@ def delete_notification(notification_id):
             500,
         )
 
+# This will ensure the database tables match our models
+with app.app_context():
+    db.create_all()
+    print("Database tables created/updated.")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5011, debug=True)

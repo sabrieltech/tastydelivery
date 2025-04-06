@@ -323,7 +323,7 @@ DROP TABLE IF EXISTS `notification`;
 CREATE TABLE IF NOT EXISTS `notification` (
   `notification_id` VARCHAR(32) NOT NULL,
   `customer_id` VARCHAR(32) NOT NULL,
-  `message_type` ENUM('Payment_Success', 'Refund_Processed', 'Loyalty_Updated') NOT NULL,
+  `message_type` ENUM('Payment_Success', 'Refund_Processed', 'Loyalty_Updated', 'Order_Delivered') NOT NULL,
   `transaction_id` VARCHAR(32) DEFAULT NULL,
   `voucher_id` VARCHAR(32) DEFAULT NULL,
   `loyalty_points` INT(11) DEFAULT NULL,
@@ -338,37 +338,37 @@ CREATE TABLE IF NOT EXISTS `notification` (
 --
 
 INSERT INTO `notification` (`notification_id`, `customer_id`, `message_type`, `transaction_id`, `voucher_id`, `loyalty_points`, `loyalty_status`, `status`, `created_at`) VALUES
-('NOTIF001', 'CUST001', 'Payment_Success', 'TRANS001', NULL, 10, 'Silver', 'Unread', '2025-03-02 17:35:24'),
-('NOTIF002', 'CUST001', 'Payment_Success', 'TRANS002', NULL, 8, 'Silver', 'Unread', '2025-03-14 11:22:07'),
-('NOTIF003', 'CUST001', 'Payment_Success', 'TRANS003', NULL, 15, 'Silver', 'Unread', '2025-03-09 19:45:33'),
-('NOTIF004', 'CUST001', 'Payment_Success', 'TRANS004', NULL, 12, 'Silver', 'Unread', '2025-03-11 08:30:23'),
+('NOTIF001', 'CUST001', 'Order_Delivered', 'TRANS001', NULL, 10, 'Silver', 'Unread', '2025-03-02 17:35:24'),
+('NOTIF002', 'CUST001', 'Order_Delivered', 'TRANS002', NULL, 8, 'Silver', 'Unread', '2025-03-14 11:22:07'),
+('NOTIF003', 'CUST001', 'Order_Delivered', 'TRANS003', NULL, 15, 'Silver', 'Unread', '2025-03-09 19:45:33'),
+('NOTIF004', 'CUST001', 'Order_Delivered', 'TRANS004', NULL, 12, 'Silver', 'Unread', '2025-03-11 08:30:23'),
 ('NOTIF005', 'CUST001', 'Refund_Processed', 'TRANS005', 'VOUCH002', NULL, NULL, 'Unread', '2025-03-07 15:30:16'),
-('NOTIF006', 'CUST002', 'Payment_Success', 'TRANS006', NULL, 20, 'Gold', 'Unread', NOW()),
-('NOTIF007', 'CUST002', 'Payment_Success', 'TRANS007', NULL, 18, 'Gold', 'Unread', NOW()),
-('NOTIF008', 'CUST002', 'Payment_Success', 'TRANS008', NULL, 25, 'Gold', 'Unread', NOW()),
-('NOTIF009', 'CUST002', 'Payment_Success', 'TRANS009', NULL, 22, 'Gold', 'Unread', NOW()),
+('NOTIF006', 'CUST002', 'Order_Delivered', 'TRANS006', NULL, 20, 'Gold', 'Unread', NOW()),
+('NOTIF007', 'CUST002', 'Order_Delivered', 'TRANS007', NULL, 18, 'Gold', 'Unread', NOW()),
+('NOTIF008', 'CUST002', 'Order_Delivered', 'TRANS008', NULL, 25, 'Gold', 'Unread', NOW()),
+('NOTIF009', 'CUST002', 'Order_Delivered', 'TRANS009', NULL, 22, 'Gold', 'Unread', NOW()),
 ('NOTIF010', 'CUST002', 'Refund_Processed', 'TRANS010', 'VOUCH004', NULL, NULL, 'Unread', NOW()),
-('NOTIF011', 'CUST003', 'Payment_Success', 'TRANS011', NULL, 5, 'Bronze', 'Unread', NOW()),
-('NOTIF012', 'CUST003', 'Payment_Success', 'TRANS012', NULL, 7, 'Bronze', 'Unread', NOW()),
-('NOTIF013', 'CUST003', 'Payment_Success', 'TRANS013', NULL, 12, 'Bronze', 'Unread', NOW()),
-('NOTIF014', 'CUST003', 'Payment_Success', 'TRANS014', NULL, 10, 'Bronze', 'Unread', NOW()),
+('NOTIF011', 'CUST003', 'Order_Delivered', 'TRANS011', NULL, 5, 'Bronze', 'Unread', NOW()),
+('NOTIF012', 'CUST003', 'Order_Delivered', 'TRANS012', NULL, 7, 'Bronze', 'Unread', NOW()),
+('NOTIF013', 'CUST003', 'Order_Delivered', 'TRANS013', NULL, 12, 'Bronze', 'Unread', NOW()),
+('NOTIF014', 'CUST003', 'Order_Delivered', 'TRANS014', NULL, 10, 'Bronze', 'Unread', NOW()),
 ('NOTIF015', 'CUST003', 'Refund_Processed', 'TRANS015', 'VOUCH005', NULL, NULL, 'Unread', NOW());
 
 -- Notifications for Completed Transactions
 INSERT INTO `notification` (`notification_id`, `customer_id`, `message_type`, `transaction_id`, `voucher_id`, `loyalty_points`, `loyalty_status`, `status`, `created_at`) VALUES
 -- CUST001 Payment Notifications
-('NOTIF016', 'CUST002', 'Payment_Success', 'TRANS016', NULL, 10, 'Silver', 'Unread', '2025-03-10 09:09:45'),
+('NOTIF016', 'CUST002', 'Order_Delivered', 'TRANS016', NULL, 10, 'Silver', 'Unread', '2025-03-10 09:09:45'),
 ('NOTIF017', 'CUST001', 'Refund_Processed', 'TRANS017', 'VOUCH001', 8, 'Silver', 'Unread', '2025-03-11 14:54:22'),
-('NOTIF018', 'CUST001', 'Payment_Success', 'TRANS018', 'VOUCH007', 10, 'Silver', 'Unread', '2025-03-07 10:01:26'),
-('NOTIF019', 'CUST002', 'Payment_Success', 'TRANS019', 'VOUCH008', 12, 'Silver', 'Unread', NOW()),
-('NOTIF020', 'CUST002', 'Payment_Success', 'TRANS020', 'VOUCH009', 11, 'Silver', 'Unread', NOW()),
-('NOTIF021', 'CUST001', 'Payment_Success', 'TRANS021', 'VOUCH011', 13, 'Silver', 'Unread', '2025-03-01 21:25:53'),
+('NOTIF018', 'CUST001', 'Order_Delivered', 'TRANS018', 'VOUCH007', 10, 'Silver', 'Unread', '2025-03-07 10:01:26'),
+('NOTIF019', 'CUST002', 'Order_Delivered', 'TRANS019', 'VOUCH008', 12, 'Silver', 'Unread', NOW()),
+('NOTIF020', 'CUST002', 'Order_Delivered', 'TRANS020', 'VOUCH009', 11, 'Silver', 'Unread', NOW()),
+('NOTIF021', 'CUST001', 'Order_Delivered', 'TRANS021', 'VOUCH011', 13, 'Silver', 'Unread', '2025-03-01 21:25:53'),
 
 -- CUST001 Cancellation/Refund Notifications
 ('NOTIF022', 'CUST002', 'Refund_Processed', 'TRANS022', NULL, 9, 'Silver', 'Unread', NOW()),
 ('NOTIF023', 'CUST003', 'Refund_Processed', 'TRANS023', NULL, 10, 'Silver', 'Unread', NOW()),
-('NOTIF024', 'CUST001', 'Payment_Success', 'TRANS024', 'VOUCH003', 20, 'Gold', 'Unread', '2025-03-02 21:25:53'),
-('NOTIF025', 'CUST001', 'Payment_Success', 'TRANS025', NULL, 22, 'Gold', 'Unread', '2025-03-09 17:57:43');
+('NOTIF024', 'CUST001', 'Order_Delivered', 'TRANS024', 'VOUCH003', 20, 'Gold', 'Unread', '2025-03-02 21:25:53'),
+('NOTIF025', 'CUST001', 'Order_Delivered', 'TRANS025', NULL, 22, 'Gold', 'Unread', '2025-03-09 17:57:43');
 
 --
 -- Table structure for table `transaction`
@@ -385,7 +385,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `loyalty_points_added` INT(11) NOT NULL DEFAULT 0,
   `current_loyalty_points` INT(11) NOT NULL DEFAULT 0,
   `current_loyalty_status` ENUM('Bronze', 'Silver', 'Gold') NOT NULL DEFAULT 'Bronze',
-  `status` ENUM('Pending', 'Submitted', 'Paid', 'Refunded', 'Cancelled') NOT NULL DEFAULT 'Pending',
+  `status` ENUM('Pending', 'Delivered', 'Paid', 'Refunded', 'Cancelled') NOT NULL DEFAULT 'Pending',
   `voucher_id` VARCHAR(32) DEFAULT NULL,
   `rider_id` VARCHAR(32) DEFAULT NULL,
   `stripe_session_id` VARCHAR(255) DEFAULT NULL,
@@ -400,30 +400,30 @@ CREATE TABLE IF NOT EXISTS `transaction` (
 --
 
 INSERT INTO `transaction` (`transaction_id`, `customer_id`, `food_cost`, `delivery_cost`, `loyalty_discount_percentage`, `total_price_after_discount`, `loyalty_points_added`, `current_loyalty_points`, `current_loyalty_status`, `status`, `voucher_id`, `rider_id`, `created_at`) VALUES
-('TRANS001', 'CUST001', 10.99, 2.99, 0.00, 13.98, 10, 130, 'Silver', 'Paid', NULL, 'RIDER001', '2025-03-02 17:35:24'),
-('TRANS002', 'CUST001', 11.99, 2.99, 5.00, 14.23, 8, 138, 'Silver', 'Paid', 'VOUCH001', NULL, '2025-03-14 11:22:07'),
-('TRANS003', 'CUST001', 9.99, 2.99, 0.00, 12.98, 15, 153, 'Silver', 'Paid', NULL, NULL, '2025-03-09 19:45:33'),
-('TRANS004', 'CUST001', 9.99, 2.99, 0.00, 12.98, 12, 165, 'Silver', 'Paid', NULL, NULL, '2025-03-11 08:30:23'),
+('TRANS001', 'CUST001', 10.99, 2.99, 0.00, 13.98, 10, 130, 'Silver', 'Delivered', NULL, 'RIDER001', '2025-03-02 17:35:24'),
+('TRANS002', 'CUST001', 11.99, 2.99, 5.00, 14.23, 8, 138, 'Silver', 'Delivered', 'VOUCH001', NULL, '2025-03-14 11:22:07'),
+('TRANS003', 'CUST001', 9.99, 2.99, 0.00, 12.98, 15, 153, 'Silver', 'Delivered', NULL, NULL, '2025-03-09 19:45:33'),
+('TRANS004', 'CUST001', 9.99, 2.99, 0.00, 12.98, 12, 165, 'Silver', 'Delivered', NULL, NULL, '2025-03-11 08:30:23'),
 ('TRANS005', 'CUST001', 13.99, 2.99, 5.00, 16.13, 9, 174, 'Silver', 'Refunded', 'VOUCH002', NULL, '2025-03-07 15:30:16'),
-('TRANS006', 'CUST002', 13.49, 2.99, 15.00, 14.01, 20, 320, 'Gold', 'Paid', 'VOUCH003', NULL, '2025-03-27 11:26:33'),
-('TRANS007', 'CUST002', 10.49, 2.99, 0.00, 13.48, 18, 338, 'Gold', 'Paid', NULL, NULL, NOW()),
-('TRANS008', 'CUST002', 9.99, 2.99, 0.00, 12.98, 25, 363, 'Gold', 'Paid', NULL, NULL, NOW()),
-('TRANS009', 'CUST002', 14.99, 2.99, 0.00, 17.98, 22, 385, 'Gold', 'Paid', NULL, 'RIDER003', '2025-03-19 21:59:44'),
+('TRANS006', 'CUST002', 13.49, 2.99, 15.00, 14.01, 20, 320, 'Gold', 'Delivered', 'VOUCH003', NULL, '2025-03-27 11:26:33'),
+('TRANS007', 'CUST002', 10.49, 2.99, 0.00, 13.48, 18, 338, 'Gold', 'Delivered', NULL, NULL, NOW()),
+('TRANS008', 'CUST002', 9.99, 2.99, 0.00, 12.98, 25, 363, 'Gold', 'Delivered', NULL, NULL, NOW()),
+('TRANS009', 'CUST002', 14.99, 2.99, 0.00, 17.98, 22, 385, 'Gold', 'Delivered', NULL, 'RIDER003', '2025-03-19 21:59:44'),
 ('TRANS010', 'CUST002', 9.99, 2.99, 10.00, 11.68, 30, 415, 'Gold', 'Refunded', 'VOUCH004', NULL, '2025-03-22 19:24:45'),
-('TRANS011', 'CUST003', 5.49, 2.99, 0.00, 8.48, 5, 55, 'Bronze', 'Paid', NULL, NULL, '2025-03-14 17:42:06'),
-('TRANS012', 'CUST003', 3.49, 2.99, 0.00, 6.48, 7, 62, 'Bronze', 'Paid', NULL, NULL, NOW()),
-('TRANS013', 'CUST003', 10.49, 2.99, 0.00, 13.48, 12, 74, 'Bronze', 'Paid', NULL, NULL, NOW()),
-('TRANS014', 'CUST003', 3.49, 2.99, 0.00, 6.48, 10, 84, 'Bronze', 'Paid', NULL, NULL, '2025-03-08 05:02:33'),
+('TRANS011', 'CUST003', 5.49, 2.99, 0.00, 8.48, 5, 55, 'Bronze', 'Delivered', NULL, NULL, '2025-03-14 17:42:06'),
+('TRANS012', 'CUST003', 3.49, 2.99, 0.00, 6.48, 7, 62, 'Bronze', 'Delivered', NULL, NULL, NOW()),
+('TRANS013', 'CUST003', 10.49, 2.99, 0.00, 13.48, 12, 74, 'Bronze', 'Delivered', NULL, NULL, NOW()),
+('TRANS014', 'CUST003', 3.49, 2.99, 0.00, 6.48, 10, 84, 'Bronze', 'Delivered', NULL, NULL, '2025-03-08 05:02:33'),
 ('TRANS015', 'CUST003', 11.99, 2.99, 3.00, 14.51, 4, 88, 'Bronze', 'Refunded', 'VOUCH005', NULL, '2025-03-16 09:09:45'),
-('TRANS016', 'CUST002', 9.49, 2.99, 0.00, 12.48, 7, 177, 'Silver', 'Paid', NULL, NULL, '2025-03-10 09:09:45'),
-('TRANS017', 'CUST001', 57.44, 2.99, 10.00, 54.39, 10, 184, 'Silver', 'Paid', 'VOUCH007', NULL, '2025-03-11 14:54:22'),
-('TRANS018', 'CUST001', 58.94, 2.99, 20.00, 49.54, 12, 196, 'Silver', 'Paid', 'VOUCH008', NULL, '2025-03-07 10:01:26'),
-('TRANS019', 'CUST002', 65.94, 2.99, 0.00, 68.93, 15, 400, 'Gold', 'Paid', NULL, NULL, NOW()),
-('TRANS020', 'CUST002', 58.43, 2.99, 0.00, 61.42, 14, 414, 'Gold', 'Paid', NULL, NULL, NOW()),
-('TRANS021', 'CUST001', 40.44, 2.99, 15.00, 36.91, 11, 207, 'Silver', 'Paid', 'VOUCH009', NULL, '2025-03-01 06:15:40'),
-('TRANS022', 'CUST002', 65.94, 2.99, 5.00, 65.38, 13, 427, 'Gold', 'Paid', 'VOUCH010', NULL, NOW()),
-('TRANS023', 'CUST003', 41.44, 2.99, 7.00, 41.31, 9, 97, 'Bronze', 'Paid', 'VOUCH011', NULL, NOW()),
-('TRANS024', 'CUST001', 57.44, 2.99, 7.00, 56.20, 13, 220, 'Silver', 'Paid', 'VOUCH011', NULL, '2025-03-02 21:25:53'),
+('TRANS016', 'CUST002', 9.49, 2.99, 0.00, 12.48, 7, 177, 'Silver', 'Delivered', NULL, NULL, '2025-03-10 09:09:45'),
+('TRANS017', 'CUST001', 57.44, 2.99, 10.00, 54.39, 10, 184, 'Silver', 'Delivered', 'VOUCH007', NULL, '2025-03-11 14:54:22'),
+('TRANS018', 'CUST001', 58.94, 2.99, 20.00, 49.54, 12, 196, 'Silver', 'Delivered', 'VOUCH008', NULL, '2025-03-07 10:01:26'),
+('TRANS019', 'CUST002', 65.94, 2.99, 0.00, 68.93, 15, 400, 'Gold', 'Delivered', NULL, NULL, NOW()),
+('TRANS020', 'CUST002', 58.43, 2.99, 0.00, 61.42, 14, 414, 'Gold', 'Delivered', NULL, NULL, NOW()),
+('TRANS021', 'CUST001', 40.44, 2.99, 15.00, 36.91, 11, 207, 'Silver', 'Delivered', 'VOUCH009', NULL, '2025-03-01 06:15:40'),
+('TRANS022', 'CUST002', 65.94, 2.99, 5.00, 65.38, 13, 427, 'Gold', 'Delivered', 'VOUCH010', NULL, NOW()),
+('TRANS023', 'CUST003', 41.44, 2.99, 7.00, 41.31, 9, 97, 'Bronze', 'Delivered', 'VOUCH011', NULL, NOW()),
+('TRANS024', 'CUST001', 57.44, 2.99, 7.00, 56.20, 13, 220, 'Silver', 'Delivered', 'VOUCH011', NULL, '2025-03-02 21:25:53'),
 ('TRANS025', 'CUST001', 57.44, 2.99, 0.00, 60.43, 10, 284, 'Silver', 'Refunded', NULL, NULL, '2025-03-09 17:57:43');
 
 --

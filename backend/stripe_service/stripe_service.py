@@ -1,4 +1,5 @@
 import stripe
+import math
 from flask import Flask, request, jsonify, render_template
 from flask_cors import cross_origin
 
@@ -78,12 +79,9 @@ def process_stripe_payment():
     discount_amount = data.get('discount_amount', 0)
     loyalty_points_used = data.get('loyalty_points_used', 0)
     
-    # Calculate loyalty discount (each point is worth $0.10)
-    loyalty_discount = loyalty_points_used * 0.1
-    
     # Calculate total amount in cents (Stripe requires amounts in smallest currency unit)
-    # Accounting for both voucher discount and loyalty points discount
-    total_amount = int((subtotal + delivery_fee - discount_amount - loyalty_discount) * 100)
+    # The discount_amount should already include any loyalty point discounts
+    total_amount = math.ceil((subtotal + delivery_fee - discount_amount) * 100)
     
     # Create product description
     product_description = f"Food order from {restaurant_name}"
@@ -172,7 +170,7 @@ def create_stripe_refund(payment_intent_id, amount, currency='sgd'):
     stripe.api_key = stripe_keys["secret_key"]
     try:
         # Stripe requires amount in cents
-        amount_in_cents = int(amount * 100)
+        amount_in_cents = math.ceil(amount * 100)
         refund = stripe.Refund.create(
             payment_intent=payment_intent_id,
             amount=amount_in_cents,
