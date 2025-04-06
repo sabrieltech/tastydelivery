@@ -18,6 +18,9 @@
           </div>
           <div class="order-status" :class="orderStatusClass">
             {{ orderDetails.status || 'Completed' }}
+            <span v-if="orderDetails.status === 'Refunded'" class="refund-badge">
+              <i class="fas fa-undo-alt"></i> Refunded
+            </span>
           </div>
         </div>
         
@@ -319,6 +322,16 @@ export default {
 .status-pending {
   background-color: #fff3cd;
   color: #856404;
+}
+
+.refund-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+  background-color: #e9ecef;
+  border-radius: 12px;
+  color: #495057;
 }
 
 .order-content {

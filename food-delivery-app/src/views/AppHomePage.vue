@@ -588,7 +588,8 @@ export default {
       // Check if notification has a transaction_id and is related to an order
       return notification.transaction_id && 
         (notification.message_type === 'Payment_Success' || 
-         notification.message_type === 'Order_Delivered');
+         notification.message_type === 'Order_Delivered' ||
+         notification.message_type === 'Refund_Processed');
     },
     
     viewNotification(notification) {
