@@ -10,17 +10,12 @@
 			"name": "Get All Notifications",
 			"request": {
 				"method": "GET",
-				"header": [],
 				"url": {
 					"raw": "http://localhost:5011/notification",
 					"protocol": "http",
-					"host": [
-						"localhost"
-					],
+					"host": ["localhost"],
 					"port": "5011",
-					"path": [
-						"notification"
-					]
+					"path": ["notification"]
 				},
 				"description": "Retrieves all notifications from the database"
 			}
@@ -29,18 +24,12 @@
 			"name": "Get Notification by ID",
 			"request": {
 				"method": "GET",
-				"header": [],
 				"url": {
 					"raw": "http://localhost:5011/notification/NOTIF001",
 					"protocol": "http",
-					"host": [
-						"localhost"
-					],
+					"host": ["localhost"],
 					"port": "5011",
-					"path": [
-						"notification",
-						"NOTIF001"
-					]
+					"path": ["notification", "NOTIF001"]
 				},
 				"description": "Retrieves a specific notification by ID"
 			}
@@ -49,19 +38,12 @@
 			"name": "Get Notifications by Customer ID",
 			"request": {
 				"method": "GET",
-				"header": [],
 				"url": {
 					"raw": "http://localhost:5011/notification/customer/CUST001",
 					"protocol": "http",
-					"host": [
-						"localhost"
-					],
+					"host": ["localhost"],
 					"port": "5011",
-					"path": [
-						"notification",
-						"customer",
-						"CUST001"
-					]
+					"path": ["notification", "customer", "CUST001"]
 				},
 				"description": "Retrieves all notifications for a specific customer"
 			}
@@ -70,20 +52,12 @@
 			"name": "Get Unread Notifications by Customer ID",
 			"request": {
 				"method": "GET",
-				"header": [],
 				"url": {
 					"raw": "http://localhost:5011/notification/unread/customer/CUST001",
 					"protocol": "http",
-					"host": [
-						"localhost"
-					],
+					"host": ["localhost"],
 					"port": "5011",
-					"path": [
-						"notification",
-						"unread",
-						"customer",
-						"CUST001"
-					]
+					"path": ["notification", "unread", "customer", "CUST001"]
 				},
 				"description": "Retrieves all unread notifications for a specific customer"
 			}
@@ -92,48 +66,37 @@
 			"name": "Create New Notification",
 			"request": {
 				"method": "POST",
-				"header": [],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"customer_id\": \"CUST001\",\n    \"message_type\": \"Payment_Success\",\n    \"transaction_id\": \"TRANS026\",\n    \"loyalty_points\": 15,\n    \"loyalty_status\": \"Silver\"\n}",
 					"options": {
-						"raw": {
-							"language": "json"
-						}
+						"raw": { "language": "json" }
 					}
 				},
 				"url": {
 					"raw": "http://localhost:5011/notification/NOTIF026",
 					"protocol": "http",
-					"host": [
-						"localhost"
-					],
+					"host": ["localhost"],
 					"port": "5011",
-					"path": [
-						"notification",
-						"NOTIF026"
-					]
+					"path": ["notification", "NOTIF026"]
 				},
-				"description": "Creates a new notification"
+				"description": "Creates a new notification and triggers RabbitMQ to process it"
+			},
+			"tests": {
+				"status_code_is_201": "pm.response.to.have.status(201);",
+				"notification_in_db": "pm.test('Notification created', function() {\n    pm.response.to.have.jsonBody('data.notification_id');\n});"
 			}
 		},
 		{
 			"name": "Mark Notification as Read",
 			"request": {
 				"method": "PUT",
-				"header": [],
 				"url": {
 					"raw": "http://localhost:5011/notification/NOTIF001/read",
 					"protocol": "http",
-					"host": [
-						"localhost"
-					],
+					"host": ["localhost"],
 					"port": "5011",
-					"path": [
-						"notification",
-						"NOTIF001",
-						"read"
-					]
+					"path": ["notification", "NOTIF001", "read"]
 				},
 				"description": "Marks a notification as read"
 			}
@@ -142,20 +105,12 @@
 			"name": "Mark All Notifications as Read",
 			"request": {
 				"method": "PUT",
-				"header": [],
 				"url": {
 					"raw": "http://localhost:5011/notification/mark_all_read/customer/CUST001",
 					"protocol": "http",
-					"host": [
-						"localhost"
-					],
+					"host": ["localhost"],
 					"port": "5011",
-					"path": [
-						"notification",
-						"mark_all_read",
-						"customer",
-						"CUST001"
-					]
+					"path": ["notification", "mark_all_read", "customer", "CUST001"]
 				},
 				"description": "Marks all notifications for a customer as read"
 			}
@@ -164,18 +119,12 @@
 			"name": "Delete Notification",
 			"request": {
 				"method": "DELETE",
-				"header": [],
 				"url": {
 					"raw": "http://localhost:5011/notification/NOTIF026",
 					"protocol": "http",
-					"host": [
-						"localhost"
-					],
+					"host": ["localhost"],
 					"port": "5011",
-					"path": [
-						"notification",
-						"NOTIF026"
-					]
+					"path": ["notification", "NOTIF026"]
 				},
 				"description": "Deletes a notification"
 			}

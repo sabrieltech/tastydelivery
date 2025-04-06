@@ -3,7 +3,26 @@ networks:
     driver: bridge
     name: fooddelivery-net
 
+volumes:
+  rabbitmq_data:
+    driver: local
+
 services:
+  ###################################
+  # RabbitMQ: The messaging broker
+  ###################################
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: rabbitmq  # Update this to 'rabbitmq' for Docker service name
+    restart: always
+    ports:
+      - "5672:5672"    # AMQP protocol
+      - "15672:15672"  # RabbitMQ Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq  # Persist RabbitMQ data
+    networks:
+      - fooddelivery-net
+
   ###################################
   # Customer: The Customer microservice
   ###################################
@@ -101,12 +120,13 @@ services:
     environment:
       dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/fooddelivery1
       PYTHONUNBUFFERED: 1
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672"  
     ports:
       - "5011:5011"
     networks:
       - fooddelivery-net
-    volumes:
-      - ./notification/templates:/templates
+    depends_on:
+      - rabbitmq
 
   ###################################
   # Voucher: The Voucher microservice
