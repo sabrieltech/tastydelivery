@@ -282,8 +282,8 @@ def process_payment():
         # Prepare data for stripe service
         stripe_data = {
             "order_id": order_id,
-            "transaction_id": transaction_id,  # Add transaction_id for reference
-            "customer_id": customer_id,  # Add customer_id for reference
+            "transaction_id": transaction_id, 
+            "customer_id": customer_id,  
             "restaurant_name": restaurant_name,
             "subtotal": float(food_cost),
             "delivery_fee": float(delivery_fee),
